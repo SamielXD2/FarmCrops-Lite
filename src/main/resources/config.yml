@@ -1,0 +1,73 @@
+# FarmCrops v1.0.0 Configuration
+
+# Show premium feature info when players click on them
+# Set to false to completely hide premium messages
+show-premium-info: true
+
+weight:
+  min: 0.5
+  max: 5.0
+  unit: "kg"
+
+prices:
+  wheat: 10.0
+  carrot: 12.0
+  potato: 11.0
+  beetroot: 13.0
+  melon: 15.0
+  default: 10.0
+
+seeds:
+  enabled: true
+  drop-chance: 100
+
+tiers:
+  common:
+    chance: 70.0
+    multiplier: 1.0
+    color: "&f"
+  uncommon:
+    chance: 20.0
+    multiplier: 1.5
+    color: "&a"
+  rare:
+    chance: 7.0
+    multiplier: 2.0
+    color: "&9"
+  epic:
+    chance: 2.5
+    multiplier: 3.0
+    color: "&5"
+  legendary:
+    chance: 0.5
+    multiplier: 5.0
+    color: "&6"
+
+holograms:
+  enabled: true
+  harvest-flash: true
+  growing-cursor: true
+  particles: true
+  preview-duration: 5
+  right-click-preview: true
+
+action-bar:
+  enabled: true
+  show-on-harvest: true
+
+chat-messages:
+  enabled: true
+  show-harvest: true
+  show-sell: true
+
+auto-save:
+  enabled: true
+  interval: 6000
+
+messages:
+  prefix: "&8[&6FarmCrops&8]&r "
+  harvest:
+    success: "&a+{money} &7({tier} {crop} - {weight}kg)"
+  sell:
+    success: "&aYou sold &f{amount} items &afor &2\${money}"
+    empty: "&cYou don't have any crops to sell!"
