@@ -1,3 +1,4 @@
+// LITE
 package player.farmcrops;
 
 import net.milkbowl.vault.economy.Economy;
@@ -270,7 +271,7 @@ public class SellGUI implements Listener {
                 // Shift+Click = sell entire group
                 double value = entry.sellAll();
                 economy.depositPlayer(player, value);
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
                 player.sendMessage(ChatColor.GREEN + "Sold group for " + ChatColor.GOLD + "$" + String.format("%.2f", value));
             } else {
                 // Regular click = sell one
@@ -336,7 +337,7 @@ public class SellGUI implements Listener {
         }
 
         plugin.getEconomy().depositPlayer(player, totalEarnings);
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         player.sendMessage(ChatColor.GREEN + "Sold " + totalItems + " crop(s) for "
             + ChatColor.GOLD + "$" + String.format("%.2f", totalEarnings) + ChatColor.GREEN + "!");
 
