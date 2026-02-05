@@ -149,15 +149,6 @@ public class PlayerSettingsGUI implements Listener {
             "Alternative to chat messages"
         ));
         
-        // Scoreboard toggle
-        gui.setItem(29, createToggleItem(
-            prefs.showScoreboard ? Material.PAINTING : Material.ITEM_FRAME,
-            "Scoreboard Display",
-            prefs.showScoreboard,
-            "Show farm stats on scoreboard",
-            "Live stats on the side"
-        ));
-        
         // Title display toggle (Premium only or locked)
         if (isPremium) {
             gui.setItem(30, createToggleItem(
@@ -335,12 +326,6 @@ public class PlayerSettingsGUI implements Listener {
                     ChatColor.GREEN + "ON" : ChatColor.RED + "OFF");
                 break;
                 
-            case 29: // Scoreboard
-                settings.toggleScoreboard(player);
-                message = "Scoreboard: " + (settings.getPreferences(player.getUniqueId()).showScoreboard ?
-                    ChatColor.GREEN + "ON" : ChatColor.RED + "OFF");
-                break;
-                
             case 30: // Title display (Premium only)
                 if (!isPremium) {
                     showPremiumMessage(player);
@@ -383,13 +368,9 @@ public class PlayerSettingsGUI implements Listener {
     private void showPremiumMessage(Player player) {
         player.closeInventory();
         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
-        player.sendMessage("");
-        player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "⭐ PREMIUM FEATURE ⭐");
-        player.sendMessage(ChatColor.YELLOW + "This setting is only available in");
-        player.sendMessage(ChatColor.YELLOW + "FarmCrops " + ChatColor.GOLD + "Premium Edition" + ChatColor.YELLOW + "!");
-        player.sendMessage("");
-        player.sendMessage(ChatColor.GOLD + "Upgrade at: " + ChatColor.WHITE + "[Your store link here]");
-        player.sendMessage("");
+        
+        // Use the MessageHandler which respects show-premium-info config
+        plugin.getMessageHandler().sendPremiumOnly(player, "This setting");
     }
     
     private ItemStack createItem(Material mat, String name, String... lore) {
