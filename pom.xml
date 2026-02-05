@@ -20,17 +20,13 @@
 
     <repositories>
         <repository>
-            <id>papermc-repo</id>
+            <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <!-- Paper -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
@@ -38,13 +34,15 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Vault (OFFICIAL, NO JITPACK) -->
         <dependency>
-            <groupId>com.github.MilkBowl</groupId>
+            <groupId>net.milkbowl.vault</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
         </dependency>
 
+        <!-- DecentHolograms -->
         <dependency>
             <groupId>com.github.DecentSoftware-eu</groupId>
             <artifactId>DecentHolograms</artifactId>
@@ -52,10 +50,11 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Item-NBT-API (STABLE CENTRAL VERSION) -->
         <dependency>
-            <groupId>com.github.tr7zw</groupId>
-            <artifactId>Item-NBT-API</artifactId>
-            <version>2.12.2</version>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api</artifactId>
+            <version>2.11.3</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
