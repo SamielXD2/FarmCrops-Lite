@@ -1,3 +1,4 @@
+// LITE
 package player.farmcrops;
 
 import org.bukkit.ChatColor;
@@ -29,24 +30,39 @@ public class MessageHandler {
     // ══════════════════════════════════════════════════════════
     
     public void sendPremiumOnly(CommandSender sender, String feature) {
+        // Check if server owner has disabled premium upgrade messages
+        if (!plugin.getConfig().getBoolean("show-premium-info", true)) {
+            // Just send a simple message without the upgrade info
+            sender.sendMessage(colorize(prefix + "&e" + feature + " is not available in Lite."));
+            return;
+        }
+        
+        // Friendly, welcoming message (not pushy)
         sender.sendMessage("");
-        sender.sendMessage(ChatColor.RED + "✗ " + feature + " is a Premium Feature!");
-        sender.sendMessage(ChatColor.GRAY + "You are using " + ChatColor.YELLOW + "FarmCrops Lite v" + 
+        sender.sendMessage(ChatColor.GOLD + "✨ " + ChatColor.YELLOW + feature + ChatColor.GRAY + " is available in the Premium edition!");
+        sender.sendMessage(ChatColor.GRAY + "You're currently using " + ChatColor.GREEN + "FarmCrops Lite v" + 
             plugin.getConfig().getString("edition.version", "0.9.0"));
         sender.sendMessage("");
-        sender.sendMessage(ChatColor.GOLD + "⭐ Upgrade to Premium to unlock:");
-        sender.sendMessage(ChatColor.YELLOW + "  • Achievement System (30+ achievements)");
-        sender.sendMessage(ChatColor.YELLOW + "  • Daily Tasks & Objectives");
-        sender.sendMessage(ChatColor.YELLOW + "  • Crop Collections Tracker");
-        sender.sendMessage(ChatColor.YELLOW + "  • Title System (earn & equip titles)");
+        sender.sendMessage(ChatColor.AQUA + "💎 The Premium edition includes:");
+        sender.sendMessage(ChatColor.GRAY + "  • " + ChatColor.WHITE + "Achievement System " + ChatColor.DARK_GRAY + "(30+ achievements)");
+        sender.sendMessage(ChatColor.GRAY + "  • " + ChatColor.WHITE + "Daily Tasks & Objectives");
+        sender.sendMessage(ChatColor.GRAY + "  • " + ChatColor.WHITE + "Crop Collections Tracker");
+        sender.sendMessage(ChatColor.GRAY + "  • " + ChatColor.WHITE + "Title System " + ChatColor.DARK_GRAY + "(earn & equip titles)");
         sender.sendMessage("");
-        sender.sendMessage(ChatColor.GREEN + "Get Premium at: " + ChatColor.AQUA + "spigotmc.org/resources/farmcrops");
+        sender.sendMessage(ChatColor.GRAY + "The Lite version is fully functional and great for most servers!");
+        sender.sendMessage(ChatColor.GRAY + "Consider Premium only if you'd like these extra features. " + ChatColor.YELLOW + "😊");
         sender.sendMessage("");
     }
     
     public void sendPremiumOnlyShort(CommandSender sender, String feature) {
-        sender.sendMessage(colorize(prefix + "&c✗ " + feature + " is a &6&lPremium Feature&c!"));
-        sender.sendMessage(colorize("&7Upgrade to unlock achievements, tasks, titles & more!"));
+        // Check config setting
+        if (!plugin.getConfig().getBoolean("show-premium-info", true)) {
+            sender.sendMessage(colorize(prefix + "&e" + feature + " is not available in Lite."));
+            return;
+        }
+        
+        sender.sendMessage(colorize(prefix + "&e" + feature + " &7is a &6Premium feature&7."));
+        sender.sendMessage(colorize("&7Lite works great as-is! Premium adds achievements, tasks & more."));
     }
     
     // ══════════════════════════════════════════════════════════
