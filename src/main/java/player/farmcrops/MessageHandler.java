@@ -41,7 +41,7 @@ public class MessageHandler {
         sender.sendMessage("");
         sender.sendMessage(ChatColor.GOLD + "✨ " + ChatColor.YELLOW + feature + ChatColor.GRAY + " is available in the Premium edition!");
         sender.sendMessage(ChatColor.GRAY + "You're currently using " + ChatColor.GREEN + "FarmCrops Lite v" + 
-            plugin.getConfig().getString("edition.version", "0.9.0"));
+            plugin.getConfig().getString("edition.version", "1.0.0"));
         sender.sendMessage("");
         sender.sendMessage(ChatColor.AQUA + "💎 The Premium edition includes:");
         sender.sendMessage(ChatColor.GRAY + "  • " + ChatColor.WHITE + "Achievement System " + ChatColor.DARK_GRAY + "(30+ achievements)");
