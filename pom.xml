@@ -28,11 +28,6 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-
-        <repository>
-            <id>tr7zw-repo</id>
-            <url>https://repo.tr7zw.dev/releases</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -58,8 +53,8 @@
         </dependency>
 
         <dependency>
-            <groupId>de.tr7zw</groupId>
-            <artifactId>item-nbt-api</artifactId>
+            <groupId>com.github.tr7zw</groupId>
+            <artifactId>Item-NBT-API</artifactId>
             <version>2.12.2</version>
             <scope>provided</scope>
         </dependency>
