@@ -1,3 +1,4 @@
+// LITE
 package player.farmcrops;
 
 import org.bukkit.*;
