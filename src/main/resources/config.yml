@@ -69,5 +69,5 @@ messages:
   harvest:
     success: "&a+{money} &7({tier} {crop} - {weight}kg)"
   sell:
-    success: "&aYou sold &f{amount} items &afor &2\${money}"
+    success: "&aYou sold &f{amount} items &afor &2${money}"
     empty: "&cYou don't have any crops to sell!"
