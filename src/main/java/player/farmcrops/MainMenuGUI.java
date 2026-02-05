@@ -124,7 +124,7 @@ public class MainMenuGUI implements Listener {
             case 11:
                 player.closeInventory();
                 playerGUIs.remove(player);
-                plugin.getStatsGUI().openGUI(player, player.getUniqueId());
+                plugin.getStatsGUI().openGUI(player);
                 break;
             case 12:
                 player.closeInventory();

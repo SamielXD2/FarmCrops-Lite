@@ -199,6 +199,8 @@ public class CropListener implements Listener {
             }
 
             // v1.0.0 Features - Daily Tasks, Collections, Achievements (always run regardless of autosell)
+            // Note: These features are not available in the Lite version
+            /* 
             try {
                 if (plugin.getDailyTaskManager() != null) {
                     plugin.getDailyTaskManager().onCropHarvest(player, block.getType());
@@ -215,6 +217,7 @@ public class CropListener implements Listener {
                 // Log but don't interrupt harvest
                 plugin.getLogger().warning("Error updating premium features: " + e.getMessage());
             }
+            */
 
             // Drop seeds (melons don't drop seeds)
             if (block.getType() != Material.MELON) {

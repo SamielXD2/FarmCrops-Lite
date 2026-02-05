@@ -40,7 +40,7 @@ public class PlayerSettingsGUI implements Listener {
         PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings()
             .getPreferences(player.getUniqueId());
         
-        boolean isPremium = plugin.hasPremiumFeatures();
+        boolean isPremium = false; // Lite version does not have premium features
         
         // Fill background
         ItemStack bgGlass = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -269,7 +269,7 @@ public class PlayerSettingsGUI implements Listener {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         
         PlayerSettings settings = plugin.getPlayerSettings();
-        boolean isPremium = plugin.hasPremiumFeatures();
+        boolean isPremium = false; // Lite version does not have premium features
         String message = "";
         
         switch (slot) {
