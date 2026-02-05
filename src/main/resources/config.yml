@@ -1,7 +1,17 @@
+# LITE
 # FarmCrops v1.0.0 Configuration
 
-# Show premium feature info when players click on them
-# Set to false to completely hide premium messages
+# ═══════════════════════════════════════════════════════════════════════
+# Premium Feature Messages
+# ═══════════════════════════════════════════════════════════════════════
+# When players try to use premium features (achievements, tasks, etc.),
+# should the plugin show them what's available in Premium edition?
+# 
+# true  = Shows a friendly message about Premium features (default)
+# false = Only shows a simple "not available in Lite" message
+#
+# This is completely optional - many server owners prefer to hide these
+# messages entirely. The Lite version works perfectly on its own!
 show-premium-info: true
 
 weight:
