@@ -37,6 +37,9 @@ public class FarmCrops extends JavaPlugin implements Listener {
     private MessageHandler messageHandler;
     private boolean holoEnabled = false;
     private final Set<UUID> hasSeenWelcome = new HashSet<>();
+    private AdminPanelGUI adminPanelGUI;
+    private AchievementManager achievementManager;
+    private AchievementGUI achievementGUI;
     @Override
     public void onEnable() {
         instance = this;
