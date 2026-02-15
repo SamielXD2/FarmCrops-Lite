@@ -33,7 +33,7 @@ seeds:
 
 tiers:
   common:
-    chance: 70.0
+    chance: 65.0
     multiplier: 1.0
     color: "&f"
   uncommon:
@@ -41,17 +41,21 @@ tiers:
     multiplier: 1.5
     color: "&a"
   rare:
-    chance: 7.0
+    chance: 10.0
     multiplier: 2.0
     color: "&9"
   epic:
-    chance: 2.5
+    chance: 3.5
     multiplier: 3.0
     color: "&5"
   legendary:
-    chance: 0.5
+    chance: 1.0
     multiplier: 5.0
     color: "&6"
+  mythic:
+    chance: 0.5
+    multiplier: 10.0
+    color: "&c"
 
 holograms:
   enabled: true
