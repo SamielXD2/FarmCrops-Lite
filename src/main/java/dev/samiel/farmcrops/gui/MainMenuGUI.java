@@ -1,4 +1,9 @@
 package dev.samiel.farmcrops.gui;
+import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.listeners.CropListener;
+import dev.samiel.farmcrops.models.PlayerSettings;
+import dev.samiel.farmcrops.managers.StatsManager;
+import dev.samiel.farmcrops.utils.InventoryUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
