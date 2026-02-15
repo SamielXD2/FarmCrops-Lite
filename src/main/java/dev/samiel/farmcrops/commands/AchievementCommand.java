@@ -1,24 +1,23 @@
 package dev.samiel.farmcrops.commands;
 import dev.samiel.farmcrops.FarmCrops;
-import dev.samiel.farmcrops.gui.*;
-import dev.samiel.farmcrops.managers.*;
+import dev.samiel.farmcrops.gui.AchievementGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-public class FarmCommand implements CommandExecutor {
+public class AchievementCommand implements CommandExecutor {
     private final FarmCrops plugin;
-    public FarmCommand(FarmCrops plugin) {
+    public AchievementCommand(FarmCrops plugin) {
         this.plugin = plugin;
     }
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
+            sender.sendMessage("Only players can use this command!");
             return true;
         }
         Player player = (Player) sender;
-        plugin.getMainMenuGUI().openGUI(player);
+        plugin.getAchievementGUI().openGUI(player);
         return true;
     }
 }
