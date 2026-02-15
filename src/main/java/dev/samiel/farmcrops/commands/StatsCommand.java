@@ -2,6 +2,7 @@ package dev.samiel.farmcrops.commands;
 import dev.samiel.farmcrops.FarmCrops;
 import dev.samiel.farmcrops.gui.*;
 import dev.samiel.farmcrops.managers.*;
+import dev.samiel.farmcrops.listeners.CropListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
