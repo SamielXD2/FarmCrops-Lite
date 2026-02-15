@@ -1,4 +1,5 @@
 package dev.samiel.farmcrops.models;
+import dev.samiel.farmcrops.FarmCrops;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -134,4 +135,3 @@ public class PlayerSettings {
         public boolean showTitle = true;
     }
 }
-  
