@@ -38,6 +38,7 @@
     </repositories>
 
     <dependencies>
+        <!-- Spigot API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -45,6 +46,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Vault (SAME AS PREMIUM) -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
@@ -52,6 +54,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- DecentHolograms (SAME AS PREMIUM) -->
         <dependency>
             <groupId>com.github.decentsoftware-eu</groupId>
             <artifactId>decentholograms</artifactId>
