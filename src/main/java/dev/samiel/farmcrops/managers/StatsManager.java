@@ -1,4 +1,6 @@
 package dev.samiel.farmcrops.managers;
+import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.models.PlayerSettings;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

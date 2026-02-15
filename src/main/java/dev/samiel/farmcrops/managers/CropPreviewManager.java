@@ -1,4 +1,6 @@
 package dev.samiel.farmcrops.managers;
+import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.models.PlayerSettings;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.Location;
