@@ -1,4 +1,6 @@
 package dev.samiel.farmcrops.listeners;
+import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.models.PlayerSettings;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
@@ -298,5 +300,4 @@ public class CropListener implements Listener {
     private String colorize(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-          }
-                          
+}
