@@ -180,4 +180,7 @@ public class FarmCrops extends JavaPlugin implements Listener {
     public HoloManager getHoloManager()        { return holoManager; }
     public ActionBarManager getActionBarManager() { return actionBarManager; }
     public MessageHandler getMessageHandler()  { return messageHandler; }
+    public AdminPanelGUI getAdminPanelGUI()    { return adminPanelGUI; }
+    public AchievementManager getAchievementManager() { return achievementManager; }
+    public AchievementGUI getAchievementGUI()  { return achievementGUI; }
 }
