@@ -58,6 +58,11 @@ public class FarmCrops extends JavaPlugin implements Listener {
         statsManager = new StatsManager(this);
         playerSettings = new PlayerSettings(this);
         actionBarManager = new ActionBarManager(this);
+        achievementManager = new AchievementManager(this);
+        adminPanelGUI = new AdminPanelGUI(this);
+        getServer().getPluginManager().registerEvents(adminPanelGUI, this);
+        achievementGUI = new AchievementGUI(this);
+        getServer().getPluginManager().registerEvents(achievementGUI, this);
         getServer().getPluginManager().registerEvents(new CropListener(this), this);
         getServer().getPluginManager().registerEvents(this, this);
         sellGUI = new SellGUI(this);
@@ -79,6 +84,9 @@ public class FarmCrops extends JavaPlugin implements Listener {
         getCommand("farmreload").setExecutor(new ReloadCommand(this));
         getCommand("farm").setExecutor(new FarmCommand(this));
         getCommand("farmbackup").setExecutor(new BackupCommand(this));
+        getCommand("farmachievements").setExecutor(new AchievementCommand(this));
+        getCommand("farmadmin").setExecutor(new FarmAdminCommand(this));
+        getCommand("farmgive").setExecutor(new FarmGiveCommand(this));
         int autoSaveInterval = getConfig().getInt("auto-save-interval", 6000);
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (statsManager != null) {
