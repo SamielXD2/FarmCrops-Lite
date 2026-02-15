@@ -6,9 +6,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>player</groupId>
+    <groupId>dev.samiel</groupId>
     <artifactId>FarmCrops</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -16,8 +16,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Lite Edition -->
-        <plugin.version>1.0.0</plugin.version>
+        <plugin.version>1.1.0</plugin.version>
         <plugin.edition>Lite</plugin.edition>
     </properties>
 
@@ -39,7 +38,6 @@
     </repositories>
 
     <dependencies>
-        <!-- Spigot API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -47,7 +45,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Vault (SAME AS PREMIUM) -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
@@ -55,7 +52,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- DecentHolograms (SAME AS PREMIUM) -->
         <dependency>
             <groupId>com.github.decentsoftware-eu</groupId>
             <artifactId>decentholograms</artifactId>
