@@ -1,4 +1,5 @@
 package dev.samiel.farmcrops.utils;
+import dev.samiel.farmcrops.FarmCrops;
 public class MoneyFormatter {
     public static String format(double amount) {
         if (amount < 1000) {
