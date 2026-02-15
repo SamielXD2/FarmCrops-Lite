@@ -37,6 +37,9 @@ public class FarmCrops extends JavaPlugin implements Listener {
     private MessageHandler messageHandler;
     private boolean holoEnabled = false;
     private final Set<UUID> hasSeenWelcome = new HashSet<>();
+    private AdminPanelGUI adminPanelGUI;
+    private AchievementManager achievementManager;
+    private AchievementGUI achievementGUI;
     @Override
     public void onEnable() {
         instance = this;
@@ -48,13 +51,18 @@ public class FarmCrops extends JavaPlugin implements Listener {
         messageHandler = new MessageHandler(this);
         if (!setupEconomy()) {
             getLogger().severe("Vault not found! Plugin disabled.");
-            getLogger().severe("Download: https:
+            getLogger().severe("Download: https://www.spigotmc.org/resources/vault.34315/");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         statsManager = new StatsManager(this);
         playerSettings = new PlayerSettings(this);
         actionBarManager = new ActionBarManager(this);
+        achievementManager = new AchievementManager(this);
+        adminPanelGUI = new AdminPanelGUI(this);
+        getServer().getPluginManager().registerEvents(adminPanelGUI, this);
+        achievementGUI = new AchievementGUI(this);
+        getServer().getPluginManager().registerEvents(achievementGUI, this);
         getServer().getPluginManager().registerEvents(new CropListener(this), this);
         getServer().getPluginManager().registerEvents(this, this);
         sellGUI = new SellGUI(this);
@@ -76,6 +84,9 @@ public class FarmCrops extends JavaPlugin implements Listener {
         getCommand("farmreload").setExecutor(new ReloadCommand(this));
         getCommand("farm").setExecutor(new FarmCommand(this));
         getCommand("farmbackup").setExecutor(new BackupCommand(this));
+        getCommand("farmachievements").setExecutor(new AchievementCommand(this));
+        getCommand("farmadmin").setExecutor(new FarmAdminCommand(this));
+        getCommand("farmgive").setExecutor(new FarmGiveCommand(this));
         int autoSaveInterval = getConfig().getInt("auto-save-interval", 6000);
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (statsManager != null) {
@@ -180,4 +191,7 @@ public class FarmCrops extends JavaPlugin implements Listener {
     public HoloManager getHoloManager()        { return holoManager; }
     public ActionBarManager getActionBarManager() { return actionBarManager; }
     public MessageHandler getMessageHandler()  { return messageHandler; }
+    public AdminPanelGUI getAdminPanelGUI()    { return adminPanelGUI; }
+    public AchievementManager getAchievementManager() { return achievementManager; }
+    public AchievementGUI getAchievementGUI()  { return achievementGUI; }
 }
