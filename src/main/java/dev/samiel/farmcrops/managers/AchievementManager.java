@@ -1,5 +1,6 @@
 package dev.samiel.farmcrops.managers;
 import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.models.PlayerSettings;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -89,15 +90,18 @@ public class AchievementManager {
         Set<String> achievements = playerAchievements.computeIfAbsent(uuid, k -> new HashSet<>());
         achievements.add(id);
         AchievementData ach = achievementData.get(id);
-        player.sendMessage("");
-        player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        player.sendMessage(ChatColor.GOLD + "★ " + ChatColor.YELLOW + "ACHIEVEMENT UNLOCKED!");
-        player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + ach.name);
-        player.sendMessage(ChatColor.GRAY + ach.description);
-        player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        player.sendMessage("");
-        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-        if (plugin.getConfig().getBoolean("achievements.broadcast", true)) {
+        PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings().getPreferences(uuid);
+        if (prefs.achievementNotifications) {
+            player.sendMessage("");
+            player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage(ChatColor.GOLD + "★ " + ChatColor.YELLOW + "ACHIEVEMENT UNLOCKED!");
+            player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + ach.name);
+            player.sendMessage(ChatColor.GRAY + ach.description);
+            player.sendMessage(ChatColor.GOLD + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage("");
+            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+        }
+        if (prefs.broadcastAchievements && plugin.getConfig().getBoolean("achievements.broadcast", true)) {
             String message = ChatColor.GOLD + "★ " + ChatColor.YELLOW + player.getName() + 
                             ChatColor.GOLD + " unlocked: " + ChatColor.GREEN + ach.name;
             Bukkit.broadcastMessage(message);
