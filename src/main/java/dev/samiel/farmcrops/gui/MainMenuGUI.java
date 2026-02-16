@@ -1,8 +1,5 @@
 package dev.samiel.farmcrops.gui;
 import dev.samiel.farmcrops.FarmCrops;
-import dev.samiel.farmcrops.listeners.CropListener;
-import dev.samiel.farmcrops.models.PlayerSettings;
-import dev.samiel.farmcrops.managers.StatsManager;
 import dev.samiel.farmcrops.utils.InventoryUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -20,67 +17,90 @@ public class MainMenuGUI implements Listener {
         this.plugin = plugin;
     }
     public void openGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, ChatColor.DARK_GREEN + "FarmCrops Menu");
+        Inventory gui = Bukkit.createInventory(null, 54, ChatColor.DARK_GREEN + "FarmCrops Menu");
         ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta gm = glass.getItemMeta();
         if (gm != null) { gm.setDisplayName(" "); glass.setItemMeta(gm); }
-        for (int i = 0; i < 27; i++) gui.setItem(i, glass);
-        gui.setItem(10, createItem(Material.EMERALD,
+        for (int i = 0; i < 54; i++) gui.setItem(i, glass);
+        gui.setItem(4, createItem(Material.SUNFLOWER,
+            ChatColor.YELLOW + "" + ChatColor.BOLD + "FARMCROPS",
+            "",
+            ChatColor.GRAY + "Weight-based farming economy",
+            ChatColor.GRAY + "Harvest crops to earn money!",
+            "",
+            ChatColor.GREEN + "Version: " + plugin.getDescription().getVersion()
+        ));
+        gui.setItem(20, createItem(Material.EMERALD,
             ChatColor.GREEN + "" + ChatColor.BOLD + "Sell Crops",
             "",
             ChatColor.GRAY + "Open the sell GUI to",
             ChatColor.GRAY + "sell your harvested crops",
             "",
-            ChatColor.YELLOW + "Click to open"
+            ChatColor.YELLOW + "➜ Click to open"
         ));
-        gui.setItem(11, createItem(Material.BOOK,
+        gui.setItem(21, createItem(Material.BOOK,
             ChatColor.AQUA + "" + ChatColor.BOLD + "Your Stats",
             "",
             ChatColor.GRAY + "View your farming",
             ChatColor.GRAY + "statistics and progress",
             "",
-            ChatColor.YELLOW + "Click to view"
+            ChatColor.YELLOW + "➜ Click to view"
         ));
-        gui.setItem(12, createItem(Material.GOLD_BLOCK,
+        gui.setItem(22, createItem(Material.GOLD_BLOCK,
             ChatColor.GOLD + "" + ChatColor.BOLD + "Leaderboard",
             "",
             ChatColor.GRAY + "View top farmers on",
             ChatColor.GRAY + "the server",
             "",
-            ChatColor.YELLOW + "Click to view"
+            ChatColor.YELLOW + "➜ Click to view"
         ));
-        gui.setItem(13, createItem(Material.COMPARATOR,
+        gui.setItem(23, createItem(Material.COMPARATOR,
             ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Settings",
             "",
             ChatColor.GRAY + "Configure your personal",
             ChatColor.GRAY + "farming preferences",
             "",
-            ChatColor.YELLOW + "Click to open"
+            ChatColor.YELLOW + "➜ Click to open"
         ));
-        gui.setItem(15, createItem(Material.WRITABLE_BOOK,
+        gui.setItem(24, createItem(Material.WRITABLE_BOOK,
             ChatColor.GOLD + "" + ChatColor.BOLD + "Achievements",
             "",
             ChatColor.GRAY + "Track your farming",
-            ChatColor.GRAY + "achievements",
+            ChatColor.GRAY + "achievements and progress",
             "",
-            ChatColor.YELLOW + "Click to view"
+            ChatColor.YELLOW + "➜ Click to view"
         ));
-        gui.setItem(16, createItem(Material.GRAY_DYE,
-            ChatColor.GRAY + "" + ChatColor.BOLD + "Daily Tasks",
+        if (player.hasPermission("farmcrops.admin")) {
+            gui.setItem(30, createItem(Material.COMMAND_BLOCK,
+                ChatColor.RED + "" + ChatColor.BOLD + "Admin Panel",
+                "",
+                ChatColor.GRAY + "Manage server settings",
+                ChatColor.GRAY + "and player data",
+                "",
+                ChatColor.YELLOW + "➜ Click to open"
+            ));
+        }
+        gui.setItem(31, createItem(Material.WHEAT,
+            ChatColor.GREEN + "" + ChatColor.BOLD + "How to Play",
             "",
-            ChatColor.DARK_GRAY + "Premium Feature",
+            ChatColor.GRAY + "1. Harvest crops from farms",
+            ChatColor.GRAY + "2. Each crop has weight + rarity",
+            ChatColor.GRAY + "3. Sell crops for money",
+            ChatColor.GRAY + "4. Unlock achievements!",
             "",
-            ChatColor.GRAY + "Available in Premium version"
+            ChatColor.AQUA + "Rarities: Common, Uncommon, Rare,",
+            ChatColor.AQUA + "Epic, Legendary, Mythic"
         ));
-        gui.setItem(4, createItem(Material.SUNFLOWER,
-            ChatColor.YELLOW + "" + ChatColor.BOLD + "FarmCrops",
+        gui.setItem(32, createItem(Material.PAPER,
+            ChatColor.AQUA + "" + ChatColor.BOLD + "Quick Commands",
             "",
-            ChatColor.GRAY + "Weight-based farming economy",
-            ChatColor.GRAY + "Harvest crops for money!",
-            "",
-            ChatColor.GREEN + "Version: " + plugin.getDescription().getVersion()
+            ChatColor.YELLOW + "/farm " + ChatColor.GRAY + "- Open this menu",
+            ChatColor.YELLOW + "/sellcrops " + ChatColor.GRAY + "- Sell your crops",
+            ChatColor.YELLOW + "/farmstats " + ChatColor.GRAY + "- View stats",
+            ChatColor.YELLOW + "/farmtop " + ChatColor.GRAY + "- View leaderboard",
+            ChatColor.YELLOW + "/farmachievements " + ChatColor.GRAY + "- View achievements"
         ));
-        gui.setItem(22, createItem(Material.BARRIER,
+        gui.setItem(49, createItem(Material.BARRIER,
             ChatColor.RED + "" + ChatColor.BOLD + "Close"
         ));
         playerGUIs.put(player, gui);
@@ -99,27 +119,33 @@ public class MainMenuGUI implements Listener {
         int slot = event.getSlot();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         switch (slot) {
-            case 10:
+            case 20:
                 player.closeInventory();
                 plugin.getSellGUI().openGUI(player);
                 break;
-            case 11:
+            case 21:
                 player.closeInventory();
                 plugin.getStatsGUI().openGUI(player);
                 break;
-            case 12:
+            case 22:
                 player.closeInventory();
                 plugin.getTopGUI().openGUI(player, 1);
                 break;
-            case 13:
+            case 23:
                 player.closeInventory();
                 plugin.getPlayerSettingsGUI().openGUI(player);
                 break;
-            case 15:
+            case 24:
                 player.closeInventory();
                 plugin.getAchievementGUI().openGUI(player);
                 break;
-            case 22:
+            case 30:
+                if (player.hasPermission("farmcrops.admin")) {
+                    player.closeInventory();
+                    plugin.getAdminPanelGUI().openMainPanel(player);
+                }
+                break;
+            case 49:
                 player.closeInventory();
                 playerGUIs.remove(player);
                 break;
