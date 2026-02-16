@@ -1,0 +1,8 @@
+# FarmCrops Achievement Data
+# This file stores player achievement progress
+# Don't edit this manually unless you know what you're doing!
+
+# Format:
+# player-uuid:
+#   - achievement_id
+#   - another_achievement_id
