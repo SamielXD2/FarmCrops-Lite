@@ -57,12 +57,13 @@ public class MainMenuGUI implements Listener {
             "",
             ChatColor.YELLOW + "Click to open"
         ));
-        gui.setItem(15, createItem(Material.GRAY_DYE,
-            ChatColor.GRAY + "" + ChatColor.BOLD + "Achievements",
+        gui.setItem(15, createItem(Material.WRITABLE_BOOK,
+            ChatColor.GOLD + "" + ChatColor.BOLD + "Achievements",
             "",
-            ChatColor.DARK_GRAY + "Premium Feature",
+            ChatColor.GRAY + "Track your farming",
+            ChatColor.GRAY + "achievements",
             "",
-            ChatColor.GRAY + "Available in Premium version"
+            ChatColor.YELLOW + "Click to view"
         ));
         gui.setItem(16, createItem(Material.GRAY_DYE,
             ChatColor.GRAY + "" + ChatColor.BOLD + "Daily Tasks",
@@ -100,31 +101,23 @@ public class MainMenuGUI implements Listener {
         switch (slot) {
             case 10:
                 player.closeInventory();
-                playerGUIs.remove(player);
                 plugin.getSellGUI().openGUI(player);
                 break;
             case 11:
                 player.closeInventory();
-                playerGUIs.remove(player);
-                plugin.getStatsGUI().openGUI(player);
+                plugin.getStatsGUI().openGUI(player, player);
                 break;
             case 12:
                 player.closeInventory();
-                playerGUIs.remove(player);
                 plugin.getTopGUI().openGUI(player, 1);
                 break;
             case 13:
                 player.closeInventory();
-                playerGUIs.remove(player);
                 plugin.getPlayerSettingsGUI().openGUI(player);
                 break;
-            case 15: 
-            case 16: 
-                if (plugin.getConfig().getBoolean("show-premium-info", true)) {
-                    player.sendMessage("");
-                    player.sendMessage(ChatColor.GRAY + "This feature is only available in the Premium version.");
-                    player.sendMessage("");
-                }
+            case 15:
+                player.closeInventory();
+                plugin.getAchievementGUI().openGUI(player);
                 break;
             case 22:
                 player.closeInventory();
@@ -132,15 +125,17 @@ public class MainMenuGUI implements Listener {
                 break;
         }
     }
-    private ItemStack createItem(Material mat, String... lore) {
-        ItemStack item = new ItemStack(mat);
+    private ItemStack createItem(Material material, String... lore) {
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            if (lore.length > 0) {
-                meta.setDisplayName(lore[0]);
-                if (lore.length > 1) {
-                    meta.setLore(Arrays.asList(Arrays.copyOfRange(lore, 1, lore.length)));
+        if (meta != null && lore.length > 0) {
+            meta.setDisplayName(lore[0]);
+            if (lore.length > 1) {
+                List<String> loreList = new ArrayList<>();
+                for (int i = 1; i < lore.length; i++) {
+                    loreList.add(lore[i]);
                 }
+                meta.setLore(loreList);
             }
             item.setItemMeta(meta);
         }
