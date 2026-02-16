@@ -18,7 +18,7 @@ public class PlayerSettingsGUI implements Listener {
         this.plugin = plugin;
     }
     public void openGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 36, ChatColor.LIGHT_PURPLE + "Farm Settings");
+        Inventory gui = Bukkit.createInventory(null, 45, ChatColor.LIGHT_PURPLE + "Farm Settings");
         PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings().getPreferences(player.getUniqueId());
         gui.setItem(10, createToggleItem(Material.BOOK, 
             ChatColor.AQUA + "" + ChatColor.BOLD + "Harvest Messages",
@@ -51,7 +51,18 @@ public class PlayerSettingsGUI implements Listener {
             "Automatically sell harvested crops",
             "Requires permission: farmcrops.autosell.use"
         ));
-        gui.setItem(31, createItem(Material.BARRIER,
+        gui.setItem(16, createToggleItem(Material.WRITABLE_BOOK,
+            ChatColor.GOLD + "" + ChatColor.BOLD + "Achievement Notifications",
+            prefs.achievementNotifications,
+            "Show notifications when you unlock achievements"
+        ));
+        gui.setItem(19, createToggleItem(Material.BELL,
+            ChatColor.YELLOW + "" + ChatColor.BOLD + "Broadcast Achievements",
+            prefs.broadcastAchievements,
+            "Announce your achievements to the server",
+            "Other players will see when you unlock achievements"
+        ));
+        gui.setItem(40, createItem(Material.BARRIER,
             ChatColor.RED + "" + ChatColor.BOLD + "Close"
         ));
         playerGUIs.put(player, gui);
@@ -105,7 +116,17 @@ public class PlayerSettingsGUI implements Listener {
                     player.sendMessage(ChatColor.RED + "You need permission: farmcrops.autosell.use");
                 }
                 break;
-            case 31:
+            case 16:
+                prefs.achievementNotifications = !prefs.achievementNotifications;
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
+                openGUI(player);
+                break;
+            case 19:
+                prefs.broadcastAchievements = !prefs.broadcastAchievements;
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
+                openGUI(player);
+                break;
+            case 40:
                 player.closeInventory();
                 playerGUIs.remove(player);
                 break;
