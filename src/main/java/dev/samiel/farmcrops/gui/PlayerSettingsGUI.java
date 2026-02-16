@@ -18,7 +18,7 @@ public class PlayerSettingsGUI implements Listener {
         this.plugin = plugin;
     }
     public void openGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, ChatColor.LIGHT_PURPLE + "Farm Settings");
+        Inventory gui = Bukkit.createInventory(null, 36, ChatColor.LIGHT_PURPLE + "Farm Settings");
         PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings().getPreferences(player.getUniqueId());
         gui.setItem(10, createToggleItem(Material.BOOK, 
             ChatColor.AQUA + "" + ChatColor.BOLD + "Harvest Messages",
@@ -40,13 +40,18 @@ public class PlayerSettingsGUI implements Listener {
             prefs.playSounds,
             "Play sounds on actions"
         ));
-        gui.setItem(14, createToggleItem(Material.EMERALD,
+        gui.setItem(14, createToggleItem(Material.EXPERIENCE_BOTTLE,
+            ChatColor.AQUA + "" + ChatColor.BOLD + "Action Bar",
+            prefs.showActionBar,
+            "Show harvest info in action bar"
+        ));
+        gui.setItem(15, createToggleItem(Material.EMERALD,
             ChatColor.GREEN + "" + ChatColor.BOLD + "Auto-Sell",
             prefs.autoSell,
             "Automatically sell harvested crops",
             "Requires permission: farmcrops.autosell.use"
         ));
-        gui.setItem(22, createItem(Material.BARRIER,
+        gui.setItem(31, createItem(Material.BARRIER,
             ChatColor.RED + "" + ChatColor.BOLD + "Close"
         ));
         playerGUIs.put(player, gui);
@@ -87,6 +92,11 @@ public class PlayerSettingsGUI implements Listener {
                 openGUI(player);
                 break;
             case 14:
+                prefs.showActionBar = !prefs.showActionBar;
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
+                openGUI(player);
+                break;
+            case 15:
                 if (player.hasPermission("farmcrops.autosell.use")) {
                     prefs.autoSell = !prefs.autoSell;
                     plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
@@ -95,7 +105,7 @@ public class PlayerSettingsGUI implements Listener {
                     player.sendMessage(ChatColor.RED + "You need permission: farmcrops.autosell.use");
                 }
                 break;
-            case 22:
+            case 31:
                 player.closeInventory();
                 playerGUIs.remove(player);
                 break;
