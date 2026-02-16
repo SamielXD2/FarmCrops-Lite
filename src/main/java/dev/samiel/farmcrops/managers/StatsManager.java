@@ -68,6 +68,9 @@ public class StatsManager {
     public int getLegendaryHarvests(UUID playerId) {
         return getStats(playerId).legendaryHarvests;
     }
+    public int getMythicHarvests(UUID playerId) {
+        return getStats(playerId).mythicHarvests;
+    }
     public int getCropHarvests(UUID playerId, String cropType) {
         return getStats(playerId).cropHarvests.getOrDefault(cropType, 0);
     }
