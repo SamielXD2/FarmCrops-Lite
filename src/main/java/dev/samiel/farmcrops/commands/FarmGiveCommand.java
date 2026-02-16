@@ -1,13 +1,16 @@
 package dev.samiel.farmcrops.commands;
 import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.listeners.CropListener;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 public class FarmGiveCommand implements CommandExecutor {
@@ -23,6 +26,7 @@ public class FarmGiveCommand implements CommandExecutor {
         }
         if (args.length < 4) {
             sender.sendMessage(ChatColor.RED + "Usage: /farmgive <player> <crop> <weight> <rarity>");
+            sender.sendMessage(ChatColor.GRAY + "Example: /farmgive Samiel wheat 5.0 MYTHIC");
             return true;
         }
         Player target = plugin.getServer().getPlayer(args[0]);
@@ -32,7 +36,7 @@ public class FarmGiveCommand implements CommandExecutor {
         }
         Material cropType = parseCropType(args[1]);
         if (cropType == null) {
-            sender.sendMessage(ChatColor.RED + "Invalid crop!");
+            sender.sendMessage(ChatColor.RED + "Invalid crop! Use: wheat, carrot, potato, beetroot, melon");
             return true;
         }
         double weight;
@@ -51,11 +55,17 @@ public class FarmGiveCommand implements CommandExecutor {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Weight: " + ChatColor.WHITE + weight + "kg");
             lore.add(ChatColor.GRAY + "Rarity: " + rarityColor + rarity);
+            double value = plugin.getCropPrice(cropType) * weight * getRarityMultiplier(rarity);
+            lore.add(ChatColor.GRAY + "Value: " + ChatColor.GOLD + "$" + String.format("%.2f", value));
             meta.setLore(lore);
+            meta.getPersistentDataContainer().set(CropListener.WEIGHT_KEY, PersistentDataType.DOUBLE, weight);
+            meta.getPersistentDataContainer().set(CropListener.TIER_KEY, PersistentDataType.STRING, rarity.toLowerCase());
+            meta.getPersistentDataContainer().set(CropListener.CROP_KEY, PersistentDataType.STRING, cropType.name());
             crop.setItemMeta(meta);
         }
         target.getInventory().addItem(crop);
-        sender.sendMessage(ChatColor.GREEN + "Gave " + target.getName() + " " + rarityColor + rarity + ChatColor.GREEN + " " + getCropName(cropType));
+        sender.sendMessage(ChatColor.GREEN + "✓ Gave " + target.getName() + " " + rarityColor + rarity + ChatColor.GREEN + " " + getCropName(cropType));
+        target.sendMessage(ChatColor.GREEN + "You received a " + rarityColor + rarity + ChatColor.GREEN + " " + getCropName(cropType) + ChatColor.GREEN + "!");
         return true;
     }
     private Material parseCropType(String input) {
@@ -87,6 +97,17 @@ public class FarmGiveCommand implements CommandExecutor {
             case "LEGENDARY": return ChatColor.GOLD;
             case "MYTHIC": return ChatColor.RED;
             default: return ChatColor.WHITE;
+        }
+    }
+    private double getRarityMultiplier(String rarity) {
+        switch (rarity.toUpperCase()) {
+            case "COMMON": return 1.0;
+            case "UNCOMMON": return 1.5;
+            case "RARE": return 2.0;
+            case "EPIC": return 3.0;
+            case "LEGENDARY": return 5.0;
+            case "MYTHIC": return 10.0;
+            default: return 1.0;
         }
     }
 }
