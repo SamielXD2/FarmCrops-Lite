@@ -105,7 +105,7 @@ public class MainMenuGUI implements Listener {
                 break;
             case 11:
                 player.closeInventory();
-                plugin.getStatsGUI().openGUI(player, player);
+                plugin.getStatsGUI().openGUI(player);
                 break;
             case 12:
                 player.closeInventory();
