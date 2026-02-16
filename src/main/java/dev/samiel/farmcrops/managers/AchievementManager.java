@@ -20,7 +20,11 @@ public class AchievementManager {
     private void loadAchievements() {
         achievementsFile = new File(plugin.getDataFolder(), "achievements.yml");
         if (!achievementsFile.exists()) {
-            plugin.saveResource("achievements.yml", false);
+            try {
+                achievementsFile.createNewFile();
+            } catch (Exception e) {
+                plugin.getLogger().warning("Could not create achievements.yml: " + e.getMessage());
+            }
         }
         achievementsConfig = YamlConfiguration.loadConfiguration(achievementsFile);
         for (String key : achievementsConfig.getKeys(false)) {
