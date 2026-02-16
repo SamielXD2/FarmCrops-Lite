@@ -4,8 +4,12 @@
 # A farming plugin with weight-based crops
 # and a tiered rarity system.
 #
-# Need help? Check the Discord server!
+# Need help? Check the wiki or ask in Discord
 # ==========================================
+
+# Show welcome message when players join?
+# Set to false to disable. Only shows to OPs if enabled.
+show-welcome-message: true
 
 # How heavy can crops be?
 weight:
@@ -33,7 +37,7 @@ tiers:
   common:
     chance: 65.0
     multiplier: 1.0
-    color: "&f"
+    color: "&7"
   uncommon:
     chance: 20.0
     multiplier: 1.5
@@ -63,6 +67,7 @@ holograms:
   particles: true          # Spawn particles on harvest
   preview-duration: 5      # How long holograms stay (seconds)
   right-click-preview: true
+  require-permission: false # If true, requires farmcrops.holograms permission
 
 # Action bar notifications
 action-bar:
@@ -89,6 +94,18 @@ messages:
   sell:
     success: "&aYou sold &f{amount} items &afor &2${money}"
     empty: "&cYou don't have any crops to sell!"
+  welcome:
+    - ""
+    - "&6&l━━━━━━━━━━ &eFARMCROPS &6&l━━━━━━━━━━"
+    - ""
+    - "&eWelcome to the farming economy!"
+    - "&7Harvest crops to earn money"
+    - ""
+    - "&aType &f/farm &ato get started!"
+    - ""
+    - "&7You can disable this message in config.yml"
+    - "&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    - ""
 
 # Custom crops toggle
 # Turn this off to disable the plugin's crop system
