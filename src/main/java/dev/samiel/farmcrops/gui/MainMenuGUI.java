@@ -22,14 +22,23 @@ public class MainMenuGUI implements Listener {
         ItemMeta gm = glass.getItemMeta();
         if (gm != null) { gm.setDisplayName(" "); glass.setItemMeta(gm); }
         for (int i = 0; i < 54; i++) gui.setItem(i, glass);
-        gui.setItem(4, createItem(Material.SUNFLOWER,
-            ChatColor.YELLOW + "" + ChatColor.BOLD + "FARMCROPS",
-            "",
-            ChatColor.GRAY + "Weight-based farming economy",
-            ChatColor.GRAY + "Harvest crops to earn money!",
-            "",
-            ChatColor.GREEN + "Version: " + plugin.getDescription().getVersion()
-        ));
+        if (player.hasPermission("farmcrops.admin")) {
+            gui.setItem(4, createItem(Material.SUNFLOWER,
+                ChatColor.YELLOW + "" + ChatColor.BOLD + "FARMCROPS",
+                "",
+                ChatColor.GRAY + "Weight-based farming economy",
+                ChatColor.GRAY + "Harvest crops to earn money!",
+                "",
+                ChatColor.GREEN + "Version: " + plugin.getDescription().getVersion()
+            ));
+        } else {
+            gui.setItem(4, createItem(Material.SUNFLOWER,
+                ChatColor.YELLOW + "" + ChatColor.BOLD + "FARMCROPS",
+                "",
+                ChatColor.GRAY + "Weight-based farming economy",
+                ChatColor.GRAY + "Harvest crops to earn money!"
+            ));
+        }
         gui.setItem(20, createItem(Material.EMERALD,
             ChatColor.GREEN + "" + ChatColor.BOLD + "Sell Crops",
             "",
