@@ -88,7 +88,9 @@ public class CropListener implements Listener {
                         );
                     }
                     plugin.getStatsManager().recordHarvest(player, block.getType(), tier, weight, price);
-                    checkAchievements(player, tier);
+                    if (plugin.getAchievementManager() != null) {
+                        plugin.getAchievementManager().checkAchievements(player);
+                    }
                 } catch (Exception e) {
                     plugin.getLogger().warning("Error during auto-sell for " + player.getName() + ": " + e.getMessage());
                     player.sendMessage(ChatColor.RED + "✗ Auto-sell failed! Check console for details.");
@@ -119,8 +121,10 @@ public class CropListener implements Listener {
                         );
                     }
                     plugin.getStatsManager().recordHarvest(player, block.getType(), tier, weight, price);
+                    if (plugin.getAchievementManager() != null) {
+                        plugin.getAchievementManager().checkAchievements(player);
+                    }
                 } catch (Exception e) {
-                    checkAchievements(player, tier);
                     plugin.getLogger().warning("Error creating crop item for " + player.getName() + ": " + e.getMessage());
                     player.sendMessage(ChatColor.RED + "✗ Failed to create crop item! Check console.");
                 }
@@ -292,7 +296,7 @@ public class CropListener implements Listener {
     private String capitalize(String s) {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
-    public static String formatName(Material m) {
+    static String formatName(Material m) {
         String name = m.name();
         if (name.endsWith("S")) {
             name = name.substring(0, name.length() - 1);
@@ -301,40 +305,5 @@ public class CropListener implements Listener {
     }
     private String colorize(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
-    }
-    private void checkAchievements(Player player, String tier) {
-        if (plugin.getAchievementManager() == null) return;
-        int totalHarvests = plugin.getStatsManager().getStats(player.getUniqueId()).totalHarvests;
-        double totalEarnings = plugin.getStatsManager().getStats(player.getUniqueId()).totalEarnings;
-        if (totalHarvests == 1) {
-            plugin.getAchievementManager().checkAndGrant(player, "first_harvest");
-        }
-        if (totalHarvests == 100) {
-            plugin.getAchievementManager().checkAndGrant(player, "100_harvests");
-        }
-        if (totalHarvests == 1000) {
-            plugin.getAchievementManager().checkAndGrant(player, "1000_harvests");
-        }
-        if (tier.equals("rare")) {
-            plugin.getAchievementManager().checkAndGrant(player, "first_rare");
-        }
-        if (tier.equals("epic")) {
-            plugin.getAchievementManager().checkAndGrant(player, "first_epic");
-        }
-        if (tier.equals("legendary")) {
-            plugin.getAchievementManager().checkAndGrant(player, "first_legendary");
-        }
-        if (tier.equals("mythic")) {
-            plugin.getAchievementManager().checkAndGrant(player, "first_mythic");
-        }
-        if (totalEarnings >= 1000 && totalEarnings < 10000) {
-            plugin.getAchievementManager().checkAndGrant(player, "earn_1000");
-        }
-        if (totalEarnings >= 10000 && totalEarnings < 100000) {
-            plugin.getAchievementManager().checkAndGrant(player, "earn_10000");
-        }
-        if (totalEarnings >= 100000) {
-            plugin.getAchievementManager().checkAndGrant(player, "earn_100000");
-        }
     }
 }
