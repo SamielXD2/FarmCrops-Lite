@@ -34,6 +34,18 @@ commands:
     description: Backup player data
     usage: /farmbackup
     permission: farmcrops.admin
+  farmachievements:
+    description: View achievements
+    usage: /farmachievements
+    aliases: [achievements, farmach]
+  farmadmin:
+    description: Admin panel
+    usage: /farmadmin
+    permission: farmcrops.admin
+  farmgive:
+    description: Give custom crop to player
+    usage: /farmgive <player> <crop> <weight> <rarity>
+    permission: farmcrops.admin
 
 permissions:
   farmcrops.*:
