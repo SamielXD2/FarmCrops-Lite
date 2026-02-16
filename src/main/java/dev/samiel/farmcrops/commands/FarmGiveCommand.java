@@ -3,7 +3,6 @@ import dev.samiel.farmcrops.FarmCrops;
 import dev.samiel.farmcrops.listeners.CropListener;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -46,26 +45,26 @@ public class FarmGiveCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Invalid weight!");
             return true;
         }
-        String rarity = args[3].toUpperCase();
+        String rarity = args[3].toLowerCase();
         ChatColor rarityColor = getRarityColor(rarity);
         ItemStack crop = new ItemStack(cropType);
         ItemMeta meta = crop.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(rarityColor + rarity + " " + getCropName(cropType));
+            meta.setDisplayName(rarityColor + rarity.toUpperCase() + " " + getCropName(cropType));
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Weight: " + ChatColor.WHITE + weight + "kg");
-            lore.add(ChatColor.GRAY + "Rarity: " + rarityColor + rarity);
+            lore.add(ChatColor.GRAY + "Rarity: " + rarityColor + rarity.toUpperCase());
             double value = plugin.getCropPrice(cropType) * weight * getRarityMultiplier(rarity);
             lore.add(ChatColor.GRAY + "Value: " + ChatColor.GOLD + "$" + String.format("%.2f", value));
             meta.setLore(lore);
             meta.getPersistentDataContainer().set(CropListener.WEIGHT_KEY, PersistentDataType.DOUBLE, weight);
-            meta.getPersistentDataContainer().set(CropListener.TIER_KEY, PersistentDataType.STRING, rarity.toLowerCase());
+            meta.getPersistentDataContainer().set(CropListener.TIER_KEY, PersistentDataType.STRING, rarity);
             meta.getPersistentDataContainer().set(CropListener.CROP_KEY, PersistentDataType.STRING, cropType.name());
             crop.setItemMeta(meta);
         }
         target.getInventory().addItem(crop);
-        sender.sendMessage(ChatColor.GREEN + "✓ Gave " + target.getName() + " " + rarityColor + rarity + ChatColor.GREEN + " " + getCropName(cropType));
-        target.sendMessage(ChatColor.GREEN + "You received a " + rarityColor + rarity + ChatColor.GREEN + " " + getCropName(cropType) + ChatColor.GREEN + "!");
+        sender.sendMessage(ChatColor.GREEN + "✓ Gave " + target.getName() + " " + rarityColor + rarity.toUpperCase() + ChatColor.GREEN + " " + getCropName(cropType));
+        target.sendMessage(ChatColor.GREEN + "You received a " + rarityColor + rarity.toUpperCase() + ChatColor.GREEN + " " + getCropName(cropType) + ChatColor.GREEN + "!");
         return true;
     }
     private Material parseCropType(String input) {
@@ -89,24 +88,24 @@ public class FarmGiveCommand implements CommandExecutor {
         }
     }
     private ChatColor getRarityColor(String rarity) {
-        switch (rarity.toUpperCase()) {
-            case "COMMON": return ChatColor.GRAY;
-            case "UNCOMMON": return ChatColor.GREEN;
-            case "RARE": return ChatColor.BLUE;
-            case "EPIC": return ChatColor.LIGHT_PURPLE;
-            case "LEGENDARY": return ChatColor.GOLD;
-            case "MYTHIC": return ChatColor.RED;
+        switch (rarity.toLowerCase()) {
+            case "common": return ChatColor.GRAY;
+            case "uncommon": return ChatColor.GREEN;
+            case "rare": return ChatColor.BLUE;
+            case "epic": return ChatColor.LIGHT_PURPLE;
+            case "legendary": return ChatColor.GOLD;
+            case "mythic": return ChatColor.RED;
             default: return ChatColor.WHITE;
         }
     }
     private double getRarityMultiplier(String rarity) {
-        switch (rarity.toUpperCase()) {
-            case "COMMON": return 1.0;
-            case "UNCOMMON": return 1.5;
-            case "RARE": return 2.0;
-            case "EPIC": return 3.0;
-            case "LEGENDARY": return 5.0;
-            case "MYTHIC": return 10.0;
+        switch (rarity.toLowerCase()) {
+            case "common": return 1.0;
+            case "uncommon": return 1.5;
+            case "rare": return 2.0;
+            case "epic": return 3.0;
+            case "legendary": return 5.0;
+            case "mythic": return 10.0;
             default: return 1.0;
         }
     }
