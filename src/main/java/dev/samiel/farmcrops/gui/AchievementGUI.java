@@ -1,5 +1,6 @@
 package dev.samiel.farmcrops.gui;
 import dev.samiel.farmcrops.FarmCrops;
+import dev.samiel.farmcrops.managers.AchievementManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -27,68 +28,39 @@ public class AchievementGUI implements Listener {
         gui.setItem(4, createItem(Material.NETHER_STAR,
             ChatColor.GOLD + "" + ChatColor.BOLD + "YOUR ACHIEVEMENTS",
             "",
-            ChatColor.GRAY + "Progress: " + ChatColor.YELLOW + plugin.getAchievementManager().getAchievementCount(player) + "/10",
+            ChatColor.GRAY + "Progress: " + ChatColor.YELLOW + 
+                plugin.getAchievementManager().getAchievementCount(player) + "/" + 
+                plugin.getAchievementManager().getTotalAchievements(),
             "",
             ChatColor.AQUA + "Keep farming to unlock more!"
         ));
-        gui.setItem(19, createAchievement(player, "first_harvest", Material.WHEAT,
-            ChatColor.GREEN + "First Harvest",
-            "Harvest your first crop"
-        ));
-        gui.setItem(20, createAchievement(player, "100_harvests", Material.IRON_HOE,
-            ChatColor.GREEN + "Farming Novice",
-            "Harvest 100 crops"
-        ));
-        gui.setItem(21, createAchievement(player, "1000_harvests", Material.DIAMOND_HOE,
-            ChatColor.GREEN + "Farming Expert",
-            "Harvest 1,000 crops"
-        ));
-        gui.setItem(28, createAchievement(player, "first_rare", Material.LAPIS_LAZULI,
-            ChatColor.BLUE + "Rare Discovery",
-            "Harvest your first RARE crop"
-        ));
-        gui.setItem(29, createAchievement(player, "first_epic", Material.AMETHYST_SHARD,
-            ChatColor.LIGHT_PURPLE + "Epic Find",
-            "Harvest your first EPIC crop"
-        ));
-        gui.setItem(30, createAchievement(player, "first_legendary", Material.GOLD_INGOT,
-            ChatColor.GOLD + "Legendary Farmer",
-            "Harvest your first LEGENDARY crop"
-        ));
-        gui.setItem(31, createAchievement(player, "first_mythic", Material.NETHERITE_INGOT,
-            ChatColor.RED + "Mythic Legend",
-            "Harvest your first MYTHIC crop"
-        ));
-        gui.setItem(37, createAchievement(player, "earn_1000", Material.GOLD_NUGGET,
-            ChatColor.YELLOW + "First Thousand",
-            "Earn $1,000 from farming"
-        ));
-        gui.setItem(38, createAchievement(player, "earn_10000", Material.GOLD_INGOT,
-            ChatColor.YELLOW + "Money Maker",
-            "Earn $10,000 from farming"
-        ));
-        gui.setItem(39, createAchievement(player, "earn_100000", Material.GOLD_BLOCK,
-            ChatColor.YELLOW + "Wealthy Farmer",
-            "Earn $100,000 from farming"
-        ));
+        int slot = 19;
+        for (AchievementManager.AchievementData ach : plugin.getAchievementManager().getAllAchievements()) {
+            gui.setItem(slot, createAchievementItem(player, ach));
+            slot++;
+            if (slot == 26) slot = 28;
+            if (slot >= 35) break;
+        }
         gui.setItem(49, createItem(Material.BARRIER,
             ChatColor.RED + "" + ChatColor.BOLD + "Close"
         ));
         player.openInventory(gui);
     }
-    private ItemStack createAchievement(Player player, String id, Material material, String name, String description) {
-        boolean unlocked = plugin.getAchievementManager().hasAchievement(player, id);
-        ItemStack item = new ItemStack(unlocked ? material : Material.GRAY_DYE);
+    private ItemStack createAchievementItem(Player player, AchievementManager.AchievementData ach) {
+        boolean unlocked = plugin.getAchievementManager().hasAchievement(player, ach.id);
+        Material material = getMaterialForType(ach.type, unlocked);
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(unlocked ? name : ChatColor.DARK_GRAY + "???");
+            meta.setDisplayName(unlocked ? getColorForType(ach.type) + ach.name : ChatColor.DARK_GRAY + "???");
             List<String> lore = new ArrayList<>();
             lore.add("");
             if (unlocked) {
-                lore.add(ChatColor.GRAY + description);
+                lore.add(ChatColor.GRAY + ach.description);
+                lore.add("");
+                lore.add(ChatColor.YELLOW + "Requirement: " + ChatColor.WHITE + getRequirementText(ach));
                 lore.add("");
                 lore.add(ChatColor.GREEN + "✓ UNLOCKED");
-                lore.add(ChatColor.GRAY + "Great job!");
             } else {
                 lore.add(ChatColor.DARK_GRAY + "???");
                 lore.add("");
@@ -99,6 +71,40 @@ public class AchievementGUI implements Listener {
             item.setItemMeta(meta);
         }
         return item;
+    }
+    private Material getMaterialForType(AchievementManager.AchievementType type, boolean unlocked) {
+        if (!unlocked) return Material.GRAY_DYE;
+        switch (type) {
+            case HARVEST: return Material.IRON_HOE;
+            case EARNINGS: return Material.GOLD_INGOT;
+            case TIER_EPIC: return Material.AMETHYST_SHARD;
+            case TIER_LEGENDARY: return Material.GOLD_BLOCK;
+            case TIER_MYTHIC: return Material.NETHERITE_INGOT;
+            case COLLECTION_WHEAT: return Material.WHEAT;
+            default: return Material.PAPER;
+        }
+    }
+    private ChatColor getColorForType(AchievementManager.AchievementType type) {
+        switch (type) {
+            case HARVEST: return ChatColor.GREEN;
+            case EARNINGS: return ChatColor.GOLD;
+            case TIER_EPIC: return ChatColor.LIGHT_PURPLE;
+            case TIER_LEGENDARY: return ChatColor.GOLD;
+            case TIER_MYTHIC: return ChatColor.RED;
+            case COLLECTION_WHEAT: return ChatColor.YELLOW;
+            default: return ChatColor.WHITE;
+        }
+    }
+    private String getRequirementText(AchievementManager.AchievementData ach) {
+        switch (ach.type) {
+            case HARVEST: return ach.requirement + " harvests";
+            case EARNINGS: return "$" + ach.requirement + " earned";
+            case TIER_EPIC: return ach.requirement + " epic crop";
+            case TIER_LEGENDARY: return ach.requirement + " legendary crop";
+            case TIER_MYTHIC: return ach.requirement + " mythic crop";
+            case COLLECTION_WHEAT: return ach.requirement + " wheat harvested";
+            default: return String.valueOf(ach.requirement);
+        }
     }
     private ItemStack createItem(Material material, String... lore) {
         ItemStack item = new ItemStack(material);
