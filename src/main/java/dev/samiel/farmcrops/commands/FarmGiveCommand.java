@@ -25,6 +25,7 @@ public class FarmGiveCommand implements CommandExecutor {
         }
         if (args.length < 4) {
             sender.sendMessage(ChatColor.RED + "Usage: /farmgive <player> <crop> <weight> <rarity>");
+            sender.sendMessage(ChatColor.GRAY + "Crops: wheat, carrot, potato, beetroot, melon");
             sender.sendMessage(ChatColor.GRAY + "Example: /farmgive Samiel wheat 5.0 MYTHIC");
             return true;
         }
@@ -54,12 +55,12 @@ public class FarmGiveCommand implements CommandExecutor {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Weight: " + ChatColor.WHITE + weight + "kg");
             lore.add(ChatColor.GRAY + "Rarity: " + rarityColor + rarity.toUpperCase());
-            double value = plugin.getCropPrice(cropType) * weight * getRarityMultiplier(rarity);
-            lore.add(ChatColor.GRAY + "Value: " + ChatColor.GOLD + "$" + String.format("%.2f", value));
+            double value = plugin.getCropPrice(getMaterialForPrice(cropType)) * weight * getRarityMultiplier(rarity);
+            lore.add(ChatColor.GRAY + "Value: " + ChatColor.GREEN + "$" + String.format("%.2f", value));
             meta.setLore(lore);
             meta.getPersistentDataContainer().set(CropListener.WEIGHT_KEY, PersistentDataType.DOUBLE, weight);
             meta.getPersistentDataContainer().set(CropListener.TIER_KEY, PersistentDataType.STRING, rarity);
-            meta.getPersistentDataContainer().set(CropListener.CROP_KEY, PersistentDataType.STRING, cropType.name());
+            meta.getPersistentDataContainer().set(CropListener.CROP_KEY, PersistentDataType.STRING, getMaterialForPrice(cropType).name());
             crop.setItemMeta(meta);
         }
         target.getInventory().addItem(crop);
@@ -70,20 +71,29 @@ public class FarmGiveCommand implements CommandExecutor {
     private Material parseCropType(String input) {
         switch (input.toLowerCase()) {
             case "wheat": return Material.WHEAT;
-            case "carrot": case "carrots": return Material.CARROTS;
-            case "potato": case "potatoes": return Material.POTATOES;
-            case "beetroot": case "beetroots": return Material.BEETROOTS;
-            case "melon": return Material.MELON;
+            case "carrot": case "carrots": return Material.CARROT;
+            case "potato": case "potatoes": return Material.POTATO;
+            case "beetroot": case "beetroots": return Material.BEETROOT;
+            case "melon": return Material.MELON_SLICE;
             default: return null;
+        }
+    }
+    private Material getMaterialForPrice(Material dropMaterial) {
+        switch (dropMaterial) {
+            case CARROT: return Material.CARROTS;
+            case POTATO: return Material.POTATOES;
+            case BEETROOT: return Material.BEETROOTS;
+            case MELON_SLICE: return Material.MELON;
+            default: return dropMaterial;
         }
     }
     private String getCropName(Material crop) {
         switch (crop) {
             case WHEAT: return "Wheat";
-            case CARROTS: return "Carrot";
-            case POTATOES: return "Potato";
-            case BEETROOTS: return "Beetroot";
-            case MELON: return "Melon";
+            case CARROT: return "Carrot";
+            case POTATO: return "Potato";
+            case BEETROOT: return "Beetroot";
+            case MELON_SLICE: return "Melon";
             default: return crop.name();
         }
     }
