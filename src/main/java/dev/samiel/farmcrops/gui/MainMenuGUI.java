@@ -31,13 +31,6 @@ public class MainMenuGUI implements Listener {
                 "",
                 ChatColor.GREEN + "Version: " + plugin.getDescription().getVersion()
             ));
-        } else {
-            gui.setItem(4, createItem(Material.SUNFLOWER,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + "FARMCROPS",
-                "",
-                ChatColor.GRAY + "Weight-based farming economy",
-                ChatColor.GRAY + "Harvest crops to earn money!"
-            ));
         }
         gui.setItem(20, createItem(Material.EMERALD,
             ChatColor.GREEN + "" + ChatColor.BOLD + "Sell Crops",
