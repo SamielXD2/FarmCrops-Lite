@@ -4,7 +4,7 @@
 # A farming plugin with weight-based crops
 # and a tiered rarity system.
 #
-# Need help? Check the wiki or ask in Discord
+# Need help? join the Discord server!!
 # ==========================================
 
 # Show welcome message when players join?
@@ -73,6 +73,10 @@ holograms:
 action-bar:
   enabled: true
   show-on-harvest: true
+
+# Achievement settings
+achievements:
+  broadcast: true  # Broadcast achievement unlocks to server
 
 # Chat message settings
 chat-messages:
