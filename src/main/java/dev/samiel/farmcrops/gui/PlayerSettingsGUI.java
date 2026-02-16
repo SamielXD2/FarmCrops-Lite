@@ -19,7 +19,7 @@ public class PlayerSettingsGUI implements Listener {
     }
     public void openGUI(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27, ChatColor.LIGHT_PURPLE + "Farm Settings");
-        PlayerSettings.Preferences prefs = plugin.getPlayerSettings().getPreferences(player);
+        PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings().getPreferences(player.getUniqueId());
         gui.setItem(10, createToggleItem(Material.BOOK, 
             ChatColor.AQUA + "" + ChatColor.BOLD + "Harvest Messages",
             prefs.showHarvestMessages,
@@ -27,7 +27,7 @@ public class PlayerSettingsGUI implements Listener {
         ));
         gui.setItem(11, createToggleItem(Material.REDSTONE,
             ChatColor.GOLD + "" + ChatColor.BOLD + "Harvest Particles",
-            prefs.showHarvestParticles,
+            prefs.showParticles,
             "Show particles when harvesting"
         ));
         gui.setItem(12, createToggleItem(Material.NAME_TAG,
@@ -64,32 +64,32 @@ public class PlayerSettingsGUI implements Listener {
         if (event.getClickedInventory() == null || !event.getClickedInventory().equals(gui)) return;
         int slot = event.getSlot();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-        PlayerSettings.Preferences prefs = plugin.getPlayerSettings().getPreferences(player);
+        PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings().getPreferences(player.getUniqueId());
         switch (slot) {
             case 10:
                 prefs.showHarvestMessages = !prefs.showHarvestMessages;
-                plugin.getPlayerSettings().saveSettings();
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
                 openGUI(player);
                 break;
             case 11:
-                prefs.showHarvestParticles = !prefs.showHarvestParticles;
-                plugin.getPlayerSettings().saveSettings();
+                prefs.showParticles = !prefs.showParticles;
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
                 openGUI(player);
                 break;
             case 12:
                 prefs.showHolograms = !prefs.showHolograms;
-                plugin.getPlayerSettings().saveSettings();
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
                 openGUI(player);
                 break;
             case 13:
                 prefs.playSounds = !prefs.playSounds;
-                plugin.getPlayerSettings().saveSettings();
+                plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
                 openGUI(player);
                 break;
             case 14:
                 if (player.hasPermission("farmcrops.autosell.use")) {
                     prefs.autoSell = !prefs.autoSell;
-                    plugin.getPlayerSettings().saveSettings();
+                    plugin.getPlayerSettings().savePreferences(player.getUniqueId(), prefs);
                     openGUI(player);
                 } else {
                     player.sendMessage(ChatColor.RED + "You need permission: farmcrops.autosell.use");
