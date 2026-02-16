@@ -296,7 +296,7 @@ public class CropListener implements Listener {
     private String capitalize(String s) {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
-    static String formatName(Material m) {
+    public static String formatName(Material m) {
         String name = m.name();
         if (name.endsWith("S")) {
             name = name.substring(0, name.length() - 1);
