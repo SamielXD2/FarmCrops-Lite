@@ -1,15 +1,11 @@
 # ==========================================
-# FarmCrops v1.1.0 - Lite Edition
+# FarmCrops v1.1.0
 # ==========================================
 # A farming plugin with weight-based crops
 # and a tiered rarity system.
 #
-# Need help? join the Discord server!
+# Need help? Check the Discord server!
 # ==========================================
-
-# Want to hide the "Premium available" messages?
-# Set this to false and players won't see them
-show-premium-info: true
 
 # How heavy can crops be?
 weight:
