@@ -49,30 +49,34 @@ public class CropListener implements Listener {
         }
         if (!(block.getBlockData() instanceof Ageable)) return;
         Ageable ageable = (Ageable) block.getBlockData();
-        if (ageable.getAge() != ageable.getMaximumAge()) return;
-        try {
-            processCropHarvest(player, block, event);
-        } catch (Exception e) {
-            plugin.getLogger().severe("Error processing harvest for " + player.getName() + ": " + e.getMessage());
-            player.sendMessage(ChatColor.RED + "✗ Error harvesting crop! Check console for details.");
-            e.printStackTrace();
+        if (ageable.getAge() < ageable.getMaximumAge()) {
+            return;
         }
+        processCropHarvest(player, block, event);
     }
     private void processCropHarvest(Player player, Block block, BlockBreakEvent event) {
-        event.setCancelled(true);
-        block.setType(Material.AIR);
-        double weight = generateWeight();
-        String tier = determineTier();
-        String color = getTierColor(tier);
-        double price = calculatePrice(block.getType(), weight, tier);
-        Location dropLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        PlayerSettings.Preferences prefs = plugin.getPlayerSettings().getPreferences(player);
-        if (prefs.autoSellEnabled) {
-            try {
-                if (plugin.getEconomy() != null) {
+        try {
+            PlayerSettings.PlayerPreferences prefs = plugin.getPlayerSettings()
+                .getPreferences(player.getUniqueId());
+            String tier;
+            double weight;
+            double price;
+            tier  = rollTier();
+            double minWeight = plugin.getConfig().getDouble("weight.min", 0.5);
+            double maxWeight = plugin.getConfig().getDouble("weight.max", 10.0);
+            weight = ThreadLocalRandom.current().nextDouble(minWeight, maxWeight);
+            weight = Math.round(weight * 100.0) / 100.0;
+            double basePrice      = getCropPrice(block.getType());
+            double tierMultiplier = plugin.getConfig().getDouble("tiers." + tier + ".multiplier", 1.0);
+            price  = basePrice * tierMultiplier * weight;
+            String color = plugin.getConfig().getString("tiers." + tier + ".color", "&7");
+            event.setDropItems(false);
+            Location dropLoc = block.getLocation().add(0.5, 0.5, 0.5);
+            if (prefs.autoSell && player.hasPermission("farmcrops.autosell.use")) {
+                try {
                     plugin.getEconomy().depositPlayer(player, price);
-                    if (prefs.showHarvestParticles && plugin.isHoloEnabled()) {
-                        block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, dropLoc, 10, 0.3, 0.3, 0.3, 0);
+                    if (prefs.playSounds) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
                     }
                     if (prefs.showHarvestMessages) {
                         player.sendMessage(colorize(color) + "+" + weight + "kg " + formatName(block.getType()) + 
@@ -115,127 +119,222 @@ public class CropListener implements Listener {
                         );
                     }
                     plugin.getStatsManager().recordHarvest(player, block.getType(), tier, weight, price);
-                    checkAchievements(player, tier);
-                    if (prefs.showHarvestParticles && plugin.isHoloEnabled()) {
-                        block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, dropLoc, 5);
-                    }
-                    if (plugin.isHoloEnabled()) {
-                        plugin.getHoloManager().spawnTemporaryHologram(
-                            dropLoc, player.getName(), tier, weight, price, formatName(block.getType())
-                        );
-                    }
                 } catch (Exception e) {
-                    plugin.getLogger().severe("Error creating crop item: " + e.getMessage());
-                    e.printStackTrace();
+                    checkAchievements(player, tier);
+                    plugin.getLogger().warning("Error creating crop item for " + player.getName() + ": " + e.getMessage());
+                    player.sendMessage(ChatColor.RED + "✗ Failed to create crop item! Check console.");
                 }
             }
-            if (plugin.getConfig().getBoolean("seeds.enabled", true)) {
-                int dropChance = plugin.getConfig().getInt("seeds.drop-chance", 100);
-                if (ThreadLocalRandom.current().nextInt(100) < dropChance) {
-                    Material seedType = getSeedType(block.getType());
-                    if (seedType != null) {
-                        block.getWorld().dropItemNaturally(dropLoc, new ItemStack(seedType, 1));
-                    }
+            if (block.getType() != Material.MELON) {
+                try {
+                    dropSeeds(block.getType(), dropLoc, player.getWorld());
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Error dropping seeds: " + e.getMessage());
                 }
             }
-        }
-        private double generateWeight() {
-            double min = plugin.getConfig().getDouble("weight.min", 0.5);
-            double max = plugin.getConfig().getDouble("weight.max", 5.0);
-            double weight = min + (ThreadLocalRandom.current().nextDouble() * (max - min));
-            return Math.round(weight * 10.0) / 10.0;
-        }
-        private String determineTier() {
-            double roll = ThreadLocalRandom.current().nextDouble(100);
-            double cumulative = 0;
-            for (String tierName : new String[]{"common", "uncommon", "rare", "epic", "legendary", "mythic"}) {
-                cumulative += plugin.getConfig().getDouble("tiers." + tierName + ".chance", 0);
-                if (roll < cumulative) {
-                    return tierName;
+            try {
+                if (prefs.showHolograms && 
+                    plugin.isHoloEnabled() && 
+                    plugin.getConfig().getBoolean("holograms.harvest-flash", true)) {
+                    plugin.getHoloManager().flashHarvest(
+                        dropLoc, player.getName(), tier, weight, price, formatName(block.getType())
+                    );
                 }
+            } catch (Exception e) {
+                plugin.getLogger().fine("Hologram error: " + e.getMessage());
             }
-            return "common";
-        }
-        private double calculatePrice(Material cropType, double weight, String tier) {
-            double basePrice = plugin.getCropPrice(cropType);
-            double multiplier = plugin.getConfig().getDouble("tiers." + tier + ".multiplier", 1.0);
-            return basePrice * weight * multiplier;
-        }
-        private String getTierColor(String tier) {
-            return plugin.getConfig().getString("tiers." + tier + ".color", "&f");
-        }
-        private Material getSeedType(Material cropType) {
-            switch (cropType) {
-                case WHEAT:     return Material.WHEAT_SEEDS;
-                case CARROTS:   return Material.CARROT;
-                case POTATOES:  return Material.POTATO;
-                case BEETROOTS: return Material.BEETROOT_SEEDS;
-                case MELON:     return Material.MELON_SEEDS;
-                default:        return null;
+            try {
+                if (prefs.showParticles && 
+                    plugin.getConfig().getBoolean("holograms.particles", true)) {
+                    spawnHarvestParticles(dropLoc, tier);
+                }
+            } catch (Exception e) {
+                plugin.getLogger().fine("Particle error: " + e.getMessage());
             }
-        }
-        private Material getDropMaterial(Material blockType) {
-            switch (blockType) {
-                case WHEAT:     return Material.WHEAT;
-                case CARROTS:   return Material.CARROT;
-                case POTATOES:  return Material.POTATO;
-                case BEETROOTS: return Material.BEETROOT;
-                case MELON:     return Material.MELON_SLICE;
-                default:        return blockType;
+            try {
+                if ((!prefs.autoSell || !player.hasPermission("farmcrops.autosell.use")) && prefs.playSounds) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+                }
+            } catch (Exception e) {
+                plugin.getLogger().fine("Sound error: " + e.getMessage());
             }
-        }
-        private boolean isTrackedCrop(Material material) {
-            for (Material crop : TRACKED_CROPS) {
-                if (crop == material) return true;
-            }
-            return false;
-        }
-        private String capitalize(String s) {
-            return s.substring(0, 1).toUpperCase() + s.substring(1);
-        }
-        public static String formatName(Material m) {
-            String name = m.name();
-            if (name.endsWith("S")) {
-                name = name.substring(0, name.length() - 1);
-            }
-            return name.charAt(0) + name.substring(1).toLowerCase().replace("_", " ");
-        }
-        private String colorize(String s) {
-            return ChatColor.translateAlternateColorCodes('&', s);
-        }
-        private void checkAchievements(Player player, String tier) {
-            if (plugin.getAchievementManager() == null) return;
-            int totalHarvests = plugin.getStatsManager().getStats(player.getUniqueId()).totalHarvests;
-            double totalEarnings = plugin.getStatsManager().getStats(player.getUniqueId()).totalEarnings;
-            if (totalHarvests == 1) {
-                plugin.getAchievementManager().checkAndGrant(player, "first_harvest");
-            }
-            if (totalHarvests == 100) {
-                plugin.getAchievementManager().checkAndGrant(player, "100_harvests");
-            }
-            if (totalHarvests == 1000) {
-                plugin.getAchievementManager().checkAndGrant(player, "1000_harvests");
-            }
-            if (tier.equals("rare")) {
-                plugin.getAchievementManager().checkAndGrant(player, "first_rare");
-            }
-            if (tier.equals("epic")) {
-                plugin.getAchievementManager().checkAndGrant(player, "first_epic");
-            }
-            if (tier.equals("legendary")) {
-                plugin.getAchievementManager().checkAndGrant(player, "first_legendary");
-            }
-            if (tier.equals("mythic")) {
-                plugin.getAchievementManager().checkAndGrant(player, "first_mythic");
-            }
-            if (totalEarnings >= 1000 && totalEarnings < 10000) {
-                plugin.getAchievementManager().checkAndGrant(player, "earn_1000");
-            }
-            if (totalEarnings >= 10000 && totalEarnings < 100000) {
-                plugin.getAchievementManager().checkAndGrant(player, "earn_10000");
-            }
-            if (totalEarnings >= 100000) {
-                plugin.getAchievementManager().checkAndGrant(player, "earn_100000");
-            }
+        } catch (Exception e) {
+            plugin.getLogger().severe("═══════════════════════════════════════");
+            plugin.getLogger().severe("CRITICAL ERROR in processCropHarvest!");
+            plugin.getLogger().severe("Player: " + player.getName());
+            plugin.getLogger().severe("Crop: " + block.getType());
+            plugin.getLogger().severe("Error: " + e.getMessage());
+            plugin.getLogger().severe("═══════════════════════════════════════");
+            e.printStackTrace();
+            player.sendMessage(ChatColor.RED + "✗ An error occurred while harvesting!");
+            player.sendMessage(ChatColor.GRAY + "Please contact an administrator.");
         }
     }
+    private void dropSeeds(Material cropType, Location location, World world) {
+        if (!plugin.getConfig().getBoolean("seeds.enabled", true)) return;
+        String cropKey = null;
+        Material seedMaterial = null;
+        switch (cropType) {
+            case WHEAT:
+                cropKey = "wheat";
+                seedMaterial = Material.WHEAT_SEEDS;
+                break;
+            case CARROTS:
+                cropKey = "carrot";
+                seedMaterial = Material.CARROT;
+                break;
+            case POTATOES:
+                cropKey = "potato";
+                seedMaterial = Material.POTATO;
+                break;
+            case BEETROOTS:
+                cropKey = "beetroot";
+                seedMaterial = Material.BEETROOT_SEEDS;
+                break;
+            case MELON:
+                return;
+            default:
+                return;
+        }
+        if (cropKey == null || seedMaterial == null) return;
+        String prefix = "seeds." + cropKey + ".";
+        if (!plugin.getConfig().contains(prefix + "chance")) return;
+        int chance = plugin.getConfig().getInt(prefix + "chance", 100);
+        int minSeeds = plugin.getConfig().getInt(prefix + "min", 1);
+        int maxSeeds = plugin.getConfig().getInt(prefix + "max", 4);
+        if (ThreadLocalRandom.current().nextInt(1, 101) > chance) return;
+        int amount = ThreadLocalRandom.current().nextInt(minSeeds, maxSeeds + 1);
+        ItemStack seeds = new ItemStack(seedMaterial, amount);
+        world.dropItemNaturally(location, seeds);
+    }
+    public double getCropPrice(Material cropType) {
+        String cropKey = null;
+        switch (cropType) {
+            case WHEAT:      cropKey = "wheat";    break;
+            case CARROTS:    cropKey = "carrot";   break;
+            case POTATOES:   cropKey = "potato";   break;
+            case BEETROOTS:  cropKey = "beetroot"; break;
+            case MELON:      cropKey = "melon";    break;
+            default: break;
+        }
+        if (cropKey != null && plugin.getConfig().contains("prices." + cropKey)) {
+            return plugin.getConfig().getDouble("prices." + cropKey);
+        }
+        return plugin.getConfig().getDouble("prices.default", 10.0);
+    }
+    private void spawnHarvestParticles(Location location, String tier) {
+        World world = location.getWorld();
+        if (world == null) return;
+        int particleAmount = plugin.getConfig().getInt("holograms.particle-amount", 10);
+        Particle particleType;
+        Object particleData = null;
+        switch (tier.toLowerCase()) {
+            case "common":
+                particleType = Particle.SMOKE_NORMAL;
+                break;
+            case "rare":
+                particleType = Particle.REDSTONE;
+                particleData = new Particle.DustOptions(Color.AQUA, 1.5f);
+                break;
+            case "epic":
+                particleType = Particle.REDSTONE;
+                particleData = new Particle.DustOptions(Color.PURPLE, 1.5f);
+                break;
+            case "legendary":
+                particleType = Particle.REDSTONE;
+                particleData = new Particle.DustOptions(Color.ORANGE, 2.0f);
+                break;
+            case "mythic":
+                particleType = Particle.REDSTONE;
+                particleData = new Particle.DustOptions(Color.RED, 2.5f);
+                break;
+            default:
+                particleType = Particle.SMOKE_NORMAL;
+                break;
+        }
+        Location particleLoc = location.clone().add(0.5, 0.5, 0.5);
+        if (particleData != null) {
+            world.spawnParticle(particleType, particleLoc, particleAmount, 0.3, 0.3, 0.3, 0.1, particleData);
+        } else {
+            world.spawnParticle(particleType, particleLoc, particleAmount, 0.3, 0.3, 0.3, 0.1);
+        }
+    }
+    private String rollTier() {
+        int roll = ThreadLocalRandom.current().nextInt(1, 101);
+        int common = plugin.getConfig().getInt("tiers.common.chance", 70);
+        int uncommon = plugin.getConfig().getInt("tiers.uncommon.chance", 10);
+        int rare   = plugin.getConfig().getInt("tiers.rare.chance", 12);
+        int epic   = plugin.getConfig().getInt("tiers.epic.chance", 6);
+        int legendary = plugin.getConfig().getInt("tiers.legendary.chance", 2);
+        int mythic = plugin.getConfig().getInt("tiers.mythic.chance", 0);
+        if (roll <= common)                                                           return "common";
+        else if (roll <= common + uncommon)                                           return "uncommon";
+        else if (roll <= common + uncommon + rare)                                     return "rare";
+        else if (roll <= common + uncommon + rare + epic)                              return "epic";
+        else if (roll <= common + uncommon + rare + epic + legendary)                  return "legendary";
+        else if (roll <= common + uncommon + rare + epic + legendary + mythic)         return "mythic";
+        else                                                                           return "common"; 
+    }
+    private boolean isTrackedCrop(Material m) {
+        for (Material t : TRACKED_CROPS) { if (t == m) return true; }
+        return false;
+    }
+    private Material getDropMaterial(Material crop) {
+        switch (crop) {
+            case WHEAT:     return Material.WHEAT;
+            case CARROTS:   return Material.CARROT;
+            case POTATOES:  return Material.POTATO;
+            case BEETROOTS: return Material.BEETROOT;
+            case MELON:     return Material.MELON_SLICE;
+            default:        return crop;
+        }
+    }
+    private String capitalize(String s) {
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+    public static String formatName(Material m) {
+        String name = m.name();
+        if (name.endsWith("S")) {
+            name = name.substring(0, name.length() - 1);
+        }
+        return name.charAt(0) + name.substring(1).toLowerCase().replace("_", " ");
+    }
+    private String colorize(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+    private void checkAchievements(Player player, String tier) {
+        if (plugin.getAchievementManager() == null) return;
+        int totalHarvests = plugin.getStatsManager().getStats(player.getUniqueId()).totalHarvests;
+        double totalEarnings = plugin.getStatsManager().getStats(player.getUniqueId()).totalEarnings;
+        if (totalHarvests == 1) {
+            plugin.getAchievementManager().checkAndGrant(player, "first_harvest");
+        }
+        if (totalHarvests == 100) {
+            plugin.getAchievementManager().checkAndGrant(player, "100_harvests");
+        }
+        if (totalHarvests == 1000) {
+            plugin.getAchievementManager().checkAndGrant(player, "1000_harvests");
+        }
+        if (tier.equals("rare")) {
+            plugin.getAchievementManager().checkAndGrant(player, "first_rare");
+        }
+        if (tier.equals("epic")) {
+            plugin.getAchievementManager().checkAndGrant(player, "first_epic");
+        }
+        if (tier.equals("legendary")) {
+            plugin.getAchievementManager().checkAndGrant(player, "first_legendary");
+        }
+        if (tier.equals("mythic")) {
+            plugin.getAchievementManager().checkAndGrant(player, "first_mythic");
+        }
+        if (totalEarnings >= 1000 && totalEarnings < 10000) {
+            plugin.getAchievementManager().checkAndGrant(player, "earn_1000");
+        }
+        if (totalEarnings >= 10000 && totalEarnings < 100000) {
+            plugin.getAchievementManager().checkAndGrant(player, "earn_10000");
+        }
+        if (totalEarnings >= 100000) {
+            plugin.getAchievementManager().checkAndGrant(player, "earn_100000");
+        }
+    }
+}
