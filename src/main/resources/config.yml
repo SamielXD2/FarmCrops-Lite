@@ -1,24 +1,23 @@
-# LITE
-# FarmCrops v1.0.0 Configuration
-
-# ═══════════════════════════════════════════════════════════════════════
-# Premium Feature Messages
-# ═══════════════════════════════════════════════════════════════════════
-# When players try to use premium features (achievements, tasks, etc.),
-# should the plugin show them what's available in Premium edition?
-# 
-# true  = Shows a friendly message about Premium features (default)
-# false = Only shows a simple "not available in Lite" message
+# ==========================================
+# FarmCrops v1.1.0 - Lite Edition
+# ==========================================
+# A farming plugin with weight-based crops
+# and a tiered rarity system.
 #
-# This is completely optional - many server owners prefer to hide these
-# messages entirely. The Lite version works perfectly on its own!
+# Need help? join the Discord server!
+# ==========================================
+
+# Want to hide the "Premium available" messages?
+# Set this to false and players won't see them
 show-premium-info: true
 
+# How heavy can crops be?
 weight:
   min: 0.5
   max: 5.0
   unit: "kg"
 
+# Base prices per crop (multiplied by weight + rarity)
 prices:
   wheat: 10.0
   carrot: 12.0
@@ -27,10 +26,13 @@ prices:
   melon: 15.0
   default: 10.0
 
+# Should crops drop seeds when harvested?
 seeds:
   enabled: true
-  drop-chance: 100
+  drop-chance: 100  # percentage
 
+# Rarity tiers and their drop rates
+# All chances should add up to 100%
 tiers:
   common:
     chance: 65.0
@@ -57,27 +59,33 @@ tiers:
     multiplier: 10.0
     color: "&c"
 
+# Hologram settings (requires DecentHolograms)
 holograms:
   enabled: true
-  harvest-flash: true
-  growing-cursor: true
-  particles: true
-  preview-duration: 5
+  harvest-flash: true      # Show hologram when harvesting
+  growing-cursor: true     # Show cursor over growing crops
+  particles: true          # Spawn particles on harvest
+  preview-duration: 5      # How long holograms stay (seconds)
   right-click-preview: true
 
+# Action bar notifications
 action-bar:
   enabled: true
   show-on-harvest: true
 
+# Chat message settings
 chat-messages:
   enabled: true
   show-harvest: true
   show-sell: true
 
+# Auto-save interval (in ticks, 20 ticks = 1 second)
+# 6000 ticks = 5 minutes
 auto-save:
   enabled: true
   interval: 6000
 
+# Message formats
 messages:
   prefix: "&8[&6FarmCrops&8]&r "
   harvest:
@@ -85,3 +93,8 @@ messages:
   sell:
     success: "&aYou sold &f{amount} items &afor &2${money}"
     empty: "&cYou don't have any crops to sell!"
+
+# Custom crops toggle
+# Turn this off to disable the plugin's crop system
+custom-crops:
+  enabled: true
