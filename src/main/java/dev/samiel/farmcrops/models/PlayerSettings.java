@@ -20,9 +20,7 @@ public class PlayerSettings {
     }
     private void loadSettings() {
         if (!settingsFile.exists()) {
-            try {
-                settingsFile.createNewFile();
-            } catch (IOException e) {
+            try { settingsFile.createNewFile(); } catch (IOException e) {
                 plugin.getLogger().warning("Failed to create player-settings.yml: " + e.getMessage());
             }
         }
@@ -36,102 +34,55 @@ public class PlayerSettings {
         }
     }
     public PlayerPreferences getPreferences(UUID uuid) {
-        if (cache.containsKey(uuid)) {
-            return cache.get(uuid);
-        }
+        if (cache.containsKey(uuid)) return cache.get(uuid);
         String path = uuid.toString() + ".";
         PlayerPreferences prefs = new PlayerPreferences();
-        prefs.autoSell = settingsConfig.getBoolean(path + "auto-sell", false);
-        prefs.showHolograms = settingsConfig.getBoolean(path + "holograms", true);
-        prefs.showParticles = settingsConfig.getBoolean(path + "particles", true);
-        prefs.playSounds = settingsConfig.getBoolean(path + "sounds", true);
-        prefs.showHarvestMessages = settingsConfig.getBoolean(path + "harvest-messages", true);
+        prefs.autoSell                 = settingsConfig.getBoolean(path + "auto-sell", false);
+        prefs.showHolograms            = settingsConfig.getBoolean(path + "holograms", true);
+        prefs.showParticles            = settingsConfig.getBoolean(path + "particles", true);
+        prefs.playSounds               = settingsConfig.getBoolean(path + "sounds", true);
+        prefs.showHarvestMessages      = settingsConfig.getBoolean(path + "harvest-messages", true);
         prefs.achievementNotifications = settingsConfig.getBoolean(path + "achievement-notifications", true);
-        prefs.broadcastAchievements = settingsConfig.getBoolean(path + "broadcast-achievements", true);
-        prefs.showActionBar = settingsConfig.getBoolean(path + "action-bar", false);
-        prefs.showScoreboard = settingsConfig.getBoolean(path + "scoreboard", false);
-        prefs.showTitle = settingsConfig.getBoolean(path + "title", true);
+        prefs.broadcastAchievements    = settingsConfig.getBoolean(path + "broadcast-achievements", true);
+        prefs.showActionBar            = settingsConfig.getBoolean(path + "action-bar", false);
+        prefs.showScoreboard           = settingsConfig.getBoolean(path + "scoreboard", false);
+        prefs.showTitle                = settingsConfig.getBoolean(path + "title", true);
+        // NEW - hologram detail level: SMALL, MEDIUM, LARGE (default MEDIUM)
+        prefs.hologramDetail = settingsConfig.getString(path + "hologram-detail", "MEDIUM");
         cache.put(uuid, prefs);
         return prefs;
     }
     public void savePreferences(UUID uuid, PlayerPreferences prefs) {
         String path = uuid.toString() + ".";
-        settingsConfig.set(path + "auto-sell", prefs.autoSell);
-        settingsConfig.set(path + "holograms", prefs.showHolograms);
-        settingsConfig.set(path + "particles", prefs.showParticles);
-        settingsConfig.set(path + "sounds", prefs.playSounds);
-        settingsConfig.set(path + "harvest-messages", prefs.showHarvestMessages);
-        settingsConfig.set(path + "achievement-notifications", prefs.achievementNotifications);
-        settingsConfig.set(path + "broadcast-achievements", prefs.broadcastAchievements);
-        settingsConfig.set(path + "action-bar", prefs.showActionBar);
-        settingsConfig.set(path + "scoreboard", prefs.showScoreboard);
-        settingsConfig.set(path + "title", prefs.showTitle);
+        settingsConfig.set(path + "auto-sell",                  prefs.autoSell);
+        settingsConfig.set(path + "holograms",                  prefs.showHolograms);
+        settingsConfig.set(path + "particles",                  prefs.showParticles);
+        settingsConfig.set(path + "sounds",                     prefs.playSounds);
+        settingsConfig.set(path + "harvest-messages",           prefs.showHarvestMessages);
+        settingsConfig.set(path + "achievement-notifications",  prefs.achievementNotifications);
+        settingsConfig.set(path + "broadcast-achievements",     prefs.broadcastAchievements);
+        settingsConfig.set(path + "action-bar",                 prefs.showActionBar);
+        settingsConfig.set(path + "scoreboard",                 prefs.showScoreboard);
+        settingsConfig.set(path + "title",                      prefs.showTitle);
+        settingsConfig.set(path + "hologram-detail",            prefs.hologramDetail);
         cache.put(uuid, prefs);
         saveSettings();
     }
-    public void toggleAutoSell(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.autoSell = !prefs.autoSell;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleHolograms(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showHolograms = !prefs.showHolograms;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleParticles(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showParticles = !prefs.showParticles;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleSounds(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.playSounds = !prefs.playSounds;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleHarvestMessages(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showHarvestMessages = !prefs.showHarvestMessages;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleAchievementNotifications(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.achievementNotifications = !prefs.achievementNotifications;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleBroadcastAchievements(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.broadcastAchievements = !prefs.broadcastAchievements;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleActionBar(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showActionBar = !prefs.showActionBar;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleScoreboard(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showScoreboard = !prefs.showScoreboard;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void toggleTitleDisplay(Player player) {
-        PlayerPreferences prefs = getPreferences(player.getUniqueId());
-        prefs.showTitle = !prefs.showTitle;
-        savePreferences(player.getUniqueId(), prefs);
-    }
-    public void clearCache(UUID uuid) {
-        cache.remove(uuid);
-    }
+    public void clearCache(UUID uuid) { cache.remove(uuid); }
     public static class PlayerPreferences {
-        public boolean autoSell = false;
-        public boolean showHolograms = true;
-        public boolean showParticles = true;
-        public boolean playSounds = true;
-        public boolean showHarvestMessages = true;
+        public boolean autoSell                 = false;
+        public boolean showHolograms            = true;
+        public boolean showParticles            = true;
+        public boolean playSounds               = true;
+        public boolean showHarvestMessages      = true;
         public boolean achievementNotifications = true;
-        public boolean broadcastAchievements = true;
-        public boolean showActionBar = false;
-        public boolean showScoreboard = false;
-        public boolean showTitle = true;
+        public boolean broadcastAchievements    = true;
+        public boolean showActionBar            = false;
+        public boolean showScoreboard           = false;
+        public boolean showTitle                = true;
+        // SMALL = crop name + status only
+        // MEDIUM = + progress bar + stage
+        // LARGE = + price estimate + tiers + harvest tip
+        public String hologramDetail            = "MEDIUM";
     }
 }
