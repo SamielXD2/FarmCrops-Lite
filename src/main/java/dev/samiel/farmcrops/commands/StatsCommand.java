@@ -1,7 +1,8 @@
 package dev.samiel.farmcrops.commands;
 import dev.samiel.farmcrops.FarmCrops;
-import dev.samiel.farmcrops.managers.*;
+import dev.samiel.farmcrops.managers.StatsManager;
 import dev.samiel.farmcrops.listeners.CropListener;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,34 +16,35 @@ public class StatsCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
-            return true;
-        }
-        Player player = (Player) sender;
-        // /farmstats reset <player>
+        // /farmstats reset <player>  — OP only
         if (args.length >= 2 && args[0].equalsIgnoreCase("reset")) {
-            if (!player.hasPermission("farmcrops.admin")) {
-                player.sendMessage(ChatColor.RED + "You don't have permission to reset stats!");
+            if (!(sender instanceof Player) || !((Player) sender).hasPermission("farmcrops.admin")) {
+                sender.sendMessage(ChatColor.RED + "You don't have permission to reset stats!");
                 return true;
             }
-            Player target = plugin.getServer().getPlayer(args[1]);
+            Player target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                player.sendMessage(ChatColor.RED + "Player '" + args[1] + "' is not online.");
+                sender.sendMessage(ChatColor.RED + "Player '" + args[1] + "' is not online.");
                 return true;
             }
             plugin.getStatsManager().resetStats(target.getUniqueId());
-            player.sendMessage(ChatColor.GREEN + "✓ Reset stats for " + ChatColor.WHITE + target.getName());
-            target.sendMessage(ChatColor.YELLOW + "Your farming stats have been reset by an admin.");
+            sender.sendMessage(ChatColor.GREEN + "✓ Reset all stats for " + ChatColor.WHITE + target.getName());
+            target.sendMessage(ChatColor.YELLOW + "Your FarmCrops stats have been reset by an admin.");
             return true;
         }
+        // Must be a player for everything below
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Use: /farmstats [player] | /farmstats reset <player>");
+            return true;
+        }
+        Player player = (Player) sender;
         // /farmstats <player>
         if (args.length > 0) {
-            if (!player.hasPermission("farmcrops.stats.others")) {
+            if (!player.hasPermission("farmcrops.stats.others") && !player.hasPermission("farmcrops.admin")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to view other players' stats.");
                 return true;
             }
-            Player target = plugin.getServer().getPlayer(args[0]);
+            Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
                 player.sendMessage(ChatColor.RED + "Player '" + args[0] + "' is not online.");
                 return true;
@@ -75,26 +77,30 @@ public class StatsCommand implements CommandExecutor {
         if (!stats.cropHarvests.isEmpty()) {
             viewer.sendMessage(ChatColor.YELLOW + "  Harvests by Crop");
             for (Map.Entry<String, Integer> entry : stats.cropHarvests.entrySet()) {
-                String cropName = CropListener.formatName(org.bukkit.Material.valueOf(entry.getKey()));
-                double earnings = stats.cropEarnings.getOrDefault(entry.getKey(), 0.0);
-                viewer.sendMessage(ChatColor.GRAY + "  " + cropName + ": "
-                    + ChatColor.WHITE + entry.getValue() + " harvests"
-                    + ChatColor.GRAY + " | " + ChatColor.GOLD + "$" + String.format("%.2f", earnings));
+                try {
+                    String cropName = CropListener.formatName(org.bukkit.Material.valueOf(entry.getKey()));
+                    double earnings = stats.cropEarnings.getOrDefault(entry.getKey(), 0.0);
+                    viewer.sendMessage(ChatColor.GRAY + "  " + cropName + ": "
+                        + ChatColor.WHITE + entry.getValue() + " harvests"
+                        + ChatColor.GRAY + " | " + ChatColor.GOLD + "$" + String.format("%.2f", earnings));
+                } catch (Exception ignored) {}
             }
             viewer.sendMessage("");
         }
         viewer.sendMessage(ChatColor.YELLOW + "  Personal Records");
         if (!stats.bestDropTier.equals("none")) {
-            String bestCrop = stats.bestDropCrop.equals("none") ? "Unknown"
-                : CropListener.formatName(org.bukkit.Material.valueOf(stats.bestDropCrop));
-            viewer.sendMessage(ChatColor.GRAY + "  Best Drop:     " + ChatColor.GOLD + "$" + String.format("%.2f", stats.bestDropValue)
-                + ChatColor.GRAY + " (" + stats.bestDropTier + " " + bestCrop + ", " + stats.bestDropWeight + " kg)");
+            try {
+                String bestCrop = CropListener.formatName(org.bukkit.Material.valueOf(stats.bestDropCrop));
+                viewer.sendMessage(ChatColor.GRAY + "  Best Drop:     " + ChatColor.GOLD + "$" + String.format("%.2f", stats.bestDropValue)
+                    + ChatColor.GRAY + " (" + stats.bestDropTier + " " + bestCrop + ", " + stats.bestDropWeight + "kg)");
+            } catch (Exception ignored) {}
         }
         if (!stats.heaviestTier.equals("none")) {
-            String heavyCrop = stats.heaviestCrop.equals("none") ? "Unknown"
-                : CropListener.formatName(org.bukkit.Material.valueOf(stats.heaviestCrop));
-            viewer.sendMessage(ChatColor.GRAY + "  Heaviest Crop: " + ChatColor.WHITE + stats.heaviestWeight + " kg"
-                + ChatColor.GRAY + " (" + stats.heaviestTier + " " + heavyCrop + ")");
+            try {
+                String heavyCrop = CropListener.formatName(org.bukkit.Material.valueOf(stats.heaviestCrop));
+                viewer.sendMessage(ChatColor.GRAY + "  Heaviest Crop: " + ChatColor.WHITE + stats.heaviestWeight + "kg"
+                    + ChatColor.GRAY + " (" + stats.heaviestTier + " " + heavyCrop + ")");
+            } catch (Exception ignored) {}
         }
         viewer.sendMessage("");
         viewer.sendMessage(bar);
