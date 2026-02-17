@@ -169,6 +169,10 @@ public class StatsManager {
             plugin.getLogger().warning("Failed to save stats for " + playerId + ": " + e.getMessage());
         }
     }
+    public void resetStats(UUID playerId) {
+        cachedStats.put(playerId, new PlayerStats());
+        saveStats(playerId, new PlayerStats());
+    }
     public void clearCache(UUID playerId) {
         cachedStats.remove(playerId);
     }
