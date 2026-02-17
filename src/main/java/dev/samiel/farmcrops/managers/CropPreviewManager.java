@@ -1,6 +1,5 @@
 package dev.samiel.farmcrops.managers;
 import dev.samiel.farmcrops.FarmCrops;
-import dev.samiel.farmcrops.models.PlayerSettings;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.Location;
@@ -12,22 +11,21 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.RayTraceResult;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 public class CropPreviewManager implements Listener {
-    private final JavaPlugin plugin;
+    private final FarmCrops plugin;
     private final Map<UUID, Hologram> activeHolograms = new HashMap<>();
     private final Map<UUID, Block> lastLookedBlock = new HashMap<>();
-    public CropPreviewManager(JavaPlugin plugin) {
+    public CropPreviewManager(FarmCrops plugin) {
         this.plugin = plugin;
     }
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getFrom().getYaw() == event.getTo().getYaw() && 
+        if (event.getFrom().getYaw() == event.getTo().getYaw() &&
             event.getFrom().getPitch() == event.getTo().getPitch() &&
             event.getFrom().getBlockX() == event.getTo().getBlockX() &&
             event.getFrom().getBlockY() == event.getTo().getBlockY() &&
@@ -35,14 +33,15 @@ public class CropPreviewManager implements Listener {
             return;
         }
         Player player = event.getPlayer();
-        if (!player.hasPermission("farmcrops.preview")) {
-            return;
-        }
+        // NO PERMISSION CHECK - everyone can see it!
         if (!plugin.getConfig().getBoolean("holograms.right-click-preview", true)) return;
+        // Check player's personal hologram setting
+        if (plugin.getPlayerSettings() != null) {
+            if (!plugin.getPlayerSettings().getPreferences(player.getUniqueId()).showHolograms) return;
+        }
         RayTraceResult result = player.rayTraceBlocks(5.0);
         if (result == null || result.getHitBlock() == null) {
-            Block lastBlock = lastLookedBlock.get(player.getUniqueId());
-            if (lastBlock != null) {
+            if (lastLookedBlock.containsKey(player.getUniqueId())) {
                 removeHologram(player);
                 lastLookedBlock.remove(player.getUniqueId());
             }
@@ -50,9 +49,7 @@ public class CropPreviewManager implements Listener {
         }
         Block block = result.getHitBlock();
         Block lastBlock = lastLookedBlock.get(player.getUniqueId());
-        if (lastBlock != null && lastBlock.equals(block)) {
-            return;
-        }
+        if (lastBlock != null && lastBlock.equals(block)) return;
         if (!isTrackedCrop(block.getType())) {
             if (lastBlock != null) {
                 removeHologram(player);
@@ -70,10 +67,19 @@ public class CropPreviewManager implements Listener {
     private void showCropPreview(Player player, Location location, int currentAge, int maxAge, Material crop) {
         removeHologram(player);
         String[] lines = formatCropInfo(crop, currentAge, maxAge);
-        Location hologramLoc = location.clone().add(0.5, 1.5, 0.5);
+        Location hologramLoc = location.clone().add(0.5, 1.8, 0.5);
         String holoName = "crop-preview-" + player.getUniqueId();
-        Hologram hologram = DHAPI.createHologram(holoName, hologramLoc, Arrays.asList(lines));
-        activeHolograms.put(player.getUniqueId(), hologram);
+        try {
+            Hologram hologram = DHAPI.createHologram(holoName, hologramLoc, Arrays.asList(lines));
+            activeHolograms.put(player.getUniqueId(), hologram);
+        } catch (Exception e) {
+            // Hologram with same name exists, delete and retry
+            try {
+                DHAPI.removeHologram(holoName);
+                Hologram hologram = DHAPI.createHologram(holoName, hologramLoc, Arrays.asList(lines));
+                activeHolograms.put(player.getUniqueId(), hologram);
+            } catch (Exception ignored) {}
+        }
     }
     private void removeHologram(Player player) {
         Hologram hologram = activeHolograms.remove(player.getUniqueId());
@@ -82,20 +88,78 @@ public class CropPreviewManager implements Listener {
         }
     }
     private String[] formatCropInfo(Material crop, int currentAge, int maxAge) {
-        String cropName = crop.name().replace("_", " ");
-        String status;
-        String color;
-        if (currentAge == maxAge) {
-            status = "READY TO HARVEST";
-            color = "§a";
+        String cropName = getCropDisplayName(crop);
+        boolean ready = currentAge == maxAge;
+        int percentage = (int) ((currentAge / (double) maxAge) * 100);
+        String progressBar = buildProgressBar(percentage);
+        String statusColor = ready ? "§a" : (percentage >= 50 ? "§e" : "§c");
+        String statusText = ready ? "§a§lREADY TO HARVEST ✔" : statusColor + "Growing... " + percentage + "%";
+        String[] tiers = getPossibleTiers();
+        double basePrice = getBasePrice(crop);
+        if (ready) {
+            return new String[] {
+                "§6§l" + cropName,
+                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                statusText,
+                "§7Progress: " + progressBar,
+                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                "§7Est. Value: §a$" + String.format("%.0f", basePrice * 0.5) + " §7- §6$" + String.format("%.0f", basePrice * 5.0),
+                "§7Possible Tiers: " + tiers[0],
+                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                "§e⚡ Right-click to harvest!"
+            };
         } else {
-            int percentage = (int) ((currentAge / (double) maxAge) * 100);
-            status = "Growing: " + percentage + "%";
-            color = "§e";
+            return new String[] {
+                "§e§l" + cropName,
+                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                statusText,
+                "§7Progress: " + progressBar,
+                "§7Stage: §f" + currentAge + "§7/§f" + maxAge,
+                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                "§7Est. Value: §a$" + String.format("%.0f", basePrice * 0.5) + " §7- §6$" + String.format("%.0f", basePrice * 5.0),
+                "§7Possible Tiers: " + tiers[0]
+            };
         }
+    }
+    private String buildProgressBar(int percentage) {
+        int filled = percentage / 10;
+        StringBuilder bar = new StringBuilder("§a");
+        for (int i = 0; i < 10; i++) {
+            if (i < filled) {
+                bar.append("█");
+            } else if (i == filled) {
+                bar.append("§e█");
+            } else {
+                bar.append("§7░");
+            }
+        }
+        bar.append(" §f").append(percentage).append("%");
+        return bar.toString();
+    }
+    private String getCropDisplayName(Material crop) {
+        switch (crop) {
+            case WHEAT:             return "Wheat";
+            case CARROTS:           return "Carrot";
+            case POTATOES:          return "Potato";
+            case BEETROOTS:         return "Beetroot";
+            case NETHER_WART:       return "Nether Wart";
+            case COCOA:             return "Cocoa";
+            case SWEET_BERRY_BUSH:  return "Sweet Berries";
+            default:                return crop.name().replace("_", " ");
+        }
+    }
+    private double getBasePrice(Material crop) {
+        switch (crop) {
+            case WHEAT:             return plugin.getConfig().getDouble("prices.wheat", 10.0);
+            case CARROTS:           return plugin.getConfig().getDouble("prices.carrot", 12.0);
+            case POTATOES:          return plugin.getConfig().getDouble("prices.potato", 11.0);
+            case BEETROOTS:         return plugin.getConfig().getDouble("prices.beetroot", 13.0);
+            default:                return plugin.getConfig().getDouble("prices.default", 10.0);
+        }
+    }
+    private String[] getPossibleTiers() {
         return new String[] {
-            color + "§l" + cropName,
-            color + status
+            "§7Common §a§lU§9R§5E§6L§cM"
         };
     }
     private boolean isTrackedCrop(Material material) {
