@@ -36,7 +36,8 @@ public class FarmCrops extends JavaPlugin implements Listener {
     private ActionBarManager actionBarManager;
     private MessageHandler messageHandler;
     private boolean holoEnabled = false;
-    private final Set<UUID> hasSeenWelcome = new HashSet<>();
+    private java.io.File welcomeSeenFile;
+    private Set<String> persistentSeenWelcome = new HashSet<>();
     private AdminPanelGUI adminPanelGUI;
     private AchievementManager achievementManager;
     private AchievementGUI achievementGUI;
@@ -103,33 +104,55 @@ public class FarmCrops extends JavaPlugin implements Listener {
             holoEnabled = true;
         }
         getLogger().info("FarmCrops v" + getDescription().getVersion() + " enabled!");
+        loadWelcomeSeen();
+    }
+    private void loadWelcomeSeen() {
+        welcomeSeenFile = new java.io.File(getDataFolder(), "welcome-seen.yml");
+        if (!welcomeSeenFile.exists()) return;
+        org.bukkit.configuration.file.FileConfiguration cfg =
+            org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(welcomeSeenFile);
+        java.util.List<String> list = cfg.getStringList("seen");
+        persistentSeenWelcome = new HashSet<>(list);
+    }
+    private void saveWelcomeSeen() {
+        try {
+            org.bukkit.configuration.file.YamlConfiguration cfg = new org.bukkit.configuration.file.YamlConfiguration();
+            cfg.set("seen", new java.util.ArrayList<>(persistentSeenWelcome));
+            cfg.save(welcomeSeenFile);
+        } catch (Exception e) {
+            getLogger().warning("Could not save welcome-seen.yml: " + e.getMessage());
+        }
     }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-        if (hasSeenWelcome.contains(uuid)) {
-            return;
-        }
-        hasSeenWelcome.add(uuid);
+        // ONLY show to OPs/admins - NEVER to regular members
+        if (!player.isOp() && !player.hasPermission("farmcrops.admin")) return;
+        // Check if disabled in config
+        if (!getConfig().getBoolean("show-welcome-message", true)) return;
+        // Truly once - persists across server restarts
+        String uuidStr = player.getUniqueId().toString();
+        if (persistentSeenWelcome.contains(uuidStr)) return;
+        persistentSeenWelcome.add(uuidStr);
+        saveWelcomeSeen();
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (player.isOnline()) {
-                player.sendMessage("");
-                player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "    FARMCROPS");
-                player.sendMessage("");
-                player.sendMessage(ChatColor.YELLOW + "Welcome to the farming economy!");
-                player.sendMessage(ChatColor.GRAY + "Harvest crops to earn money");
-                player.sendMessage("");
-                player.sendMessage(ChatColor.AQUA + "Type " + ChatColor.WHITE + "/farm" + ChatColor.AQUA + " to get started!");
-                player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                player.sendMessage("");
-            }
+            if (!player.isOnline()) return;
+            player.sendMessage("");
+            player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "    FARMCROPS v" + getDescription().getVersion());
+            player.sendMessage("");
+            player.sendMessage(ChatColor.YELLOW + "FarmCrops is running on this server!");
+            player.sendMessage(ChatColor.GRAY + "Use /farm to manage the plugin.");
+            player.sendMessage(ChatColor.GRAY + "This message only shows once.");
+            player.sendMessage("");
+            player.sendMessage(ChatColor.GRAY + "Disable in config.yml: show-welcome-message: false");
+            player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage("");
         }, 40L);
     }
     @Override
     public void onDisable() {
-        hasSeenWelcome.clear();
+
         if (statsManager != null) {
             statsManager.saveAll();
         }
@@ -141,7 +164,7 @@ public class FarmCrops extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        hasSeenWelcome.remove(uuid);
+
         if (statsManager != null) {
             statsManager.clearCache(uuid);
         }
