@@ -1,6 +1,5 @@
 package dev.samiel.farmcrops.commands;
 import dev.samiel.farmcrops.FarmCrops;
-import dev.samiel.farmcrops.gui.*;
 import dev.samiel.farmcrops.managers.*;
 import dev.samiel.farmcrops.listeners.CropListener;
 import org.bukkit.ChatColor;
@@ -21,6 +20,23 @@ public class StatsCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
+        // /farmstats reset <player>
+        if (args.length >= 2 && args[0].equalsIgnoreCase("reset")) {
+            if (!player.hasPermission("farmcrops.admin")) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to reset stats!");
+                return true;
+            }
+            Player target = plugin.getServer().getPlayer(args[1]);
+            if (target == null) {
+                player.sendMessage(ChatColor.RED + "Player '" + args[1] + "' is not online.");
+                return true;
+            }
+            plugin.getStatsManager().resetStats(target.getUniqueId());
+            player.sendMessage(ChatColor.GREEN + "✓ Reset stats for " + ChatColor.WHITE + target.getName());
+            target.sendMessage(ChatColor.YELLOW + "Your farming stats have been reset by an admin.");
+            return true;
+        }
+        // /farmstats <player>
         if (args.length > 0) {
             if (!player.hasPermission("farmcrops.stats.others")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to view other players' stats.");
@@ -34,6 +50,7 @@ public class StatsCommand implements CommandExecutor {
             displayStats(player, target.getName(), plugin.getStatsManager().getStats(target.getUniqueId()));
             return true;
         }
+        // /farmstats (self)
         displayStats(player, player.getName(), plugin.getStatsManager().getStats(player.getUniqueId()));
         return true;
     }
@@ -49,11 +66,11 @@ public class StatsCommand implements CommandExecutor {
         viewer.sendMessage(ChatColor.GRAY + "  Total Earnings: " + ChatColor.GOLD + "$" + String.format("%.2f", stats.totalEarnings));
         viewer.sendMessage("");
         viewer.sendMessage(ChatColor.YELLOW + "  Harvests by Tier");
-        viewer.sendMessage(ChatColor.GRAY  + "  " + ChatColor.WHITE   + "Common:    " + stats.commonHarvests);
-        viewer.sendMessage(ChatColor.AQUA  + "  " + ChatColor.AQUA    + "Rare:      " + stats.rareHarvests);
-        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "  " + ChatColor.LIGHT_PURPLE + "Epic:      " + stats.epicHarvests);
-        viewer.sendMessage(ChatColor.GOLD  + "  " + ChatColor.GOLD    + "Legendary: " + stats.legendaryHarvests);
-        viewer.sendMessage(ChatColor.RED   + "  " + ChatColor.RED     + "Mythic:    " + stats.mythicHarvests);
+        viewer.sendMessage(ChatColor.GRAY        + "  Common:    " + ChatColor.WHITE + stats.commonHarvests);
+        viewer.sendMessage(ChatColor.AQUA        + "  Rare:      " + stats.rareHarvests);
+        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "  Epic:      " + stats.epicHarvests);
+        viewer.sendMessage(ChatColor.GOLD        + "  Legendary: " + stats.legendaryHarvests);
+        viewer.sendMessage(ChatColor.RED         + "  Mythic:    " + stats.mythicHarvests);
         viewer.sendMessage("");
         if (!stats.cropHarvests.isEmpty()) {
             viewer.sendMessage(ChatColor.YELLOW + "  Harvests by Crop");
@@ -70,7 +87,7 @@ public class StatsCommand implements CommandExecutor {
         if (!stats.bestDropTier.equals("none")) {
             String bestCrop = stats.bestDropCrop.equals("none") ? "Unknown"
                 : CropListener.formatName(org.bukkit.Material.valueOf(stats.bestDropCrop));
-            viewer.sendMessage(ChatColor.GRAY + "  Best Drop:    " + ChatColor.GOLD + "$" + String.format("%.2f", stats.bestDropValue)
+            viewer.sendMessage(ChatColor.GRAY + "  Best Drop:     " + ChatColor.GOLD + "$" + String.format("%.2f", stats.bestDropValue)
                 + ChatColor.GRAY + " (" + stats.bestDropTier + " " + bestCrop + ", " + stats.bestDropWeight + " kg)");
         }
         if (!stats.heaviestTier.equals("none")) {
