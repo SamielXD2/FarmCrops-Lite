@@ -66,7 +66,8 @@ public class CropPreviewManager implements Listener {
     }
     private void showCropPreview(Player player, Location location, int currentAge, int maxAge, Material crop) {
         removeHologram(player);
-        String[] lines = formatCropInfo(crop, currentAge, maxAge);
+        String detail = plugin.getPlayerSettings().getPreferences(player.getUniqueId()).hologramDetail;
+        String[] lines = formatCropInfo(crop, currentAge, maxAge, detail);
         Location hologramLoc = location.clone().add(0.5, 1.8, 0.5);
         String holoName = "crop-preview-" + player.getUniqueId();
         try {
@@ -87,39 +88,42 @@ public class CropPreviewManager implements Listener {
             hologram.delete();
         }
     }
-    private String[] formatCropInfo(Material crop, int currentAge, int maxAge) {
+    private String[] formatCropInfo(Material crop, int currentAge, int maxAge, String detail) {
         String cropName = getCropDisplayName(crop);
         boolean ready = currentAge == maxAge;
         int percentage = (int) ((currentAge / (double) maxAge) * 100);
-        String progressBar = buildProgressBar(percentage);
         String statusColor = ready ? "§a" : (percentage >= 50 ? "§e" : "§c");
         String statusText = ready ? "§a§lREADY TO HARVEST ✔" : statusColor + "Growing... " + percentage + "%";
-        String[] tiers = getPossibleTiers();
-        double basePrice = getBasePrice(crop);
-        if (ready) {
+        String nameColor = ready ? "§a§l" : "§e§l";
+        if ("SMALL".equalsIgnoreCase(detail)) {
             return new String[] {
-                "§6§l" + cropName,
-                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
-                statusText,
-                "§7Progress: " + progressBar,
-                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
-                "§7Est. Value: §a$" + String.format("%.0f", basePrice * 0.5) + " §7- §6$" + String.format("%.0f", basePrice * 5.0),
-                "§7Possible Tiers: " + tiers[0],
-                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
-                "§e⚡ Right-click to harvest!"
-            };
-        } else {
-            return new String[] {
-                "§e§l" + cropName,
-                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
-                statusText,
-                "§7Progress: " + progressBar,
-                "§7Stage: §f" + currentAge + "§7/§f" + maxAge,
-                "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
-                "§7Est. Value: §a$" + String.format("%.0f", basePrice * 0.5) + " §7- §6$" + String.format("%.0f", basePrice * 5.0),
-                "§7Possible Tiers: " + tiers[0]
+                nameColor + cropName,
+                statusText
             };
         }
+        String progressBar = buildProgressBar(percentage);
+        if ("MEDIUM".equalsIgnoreCase(detail)) {
+            return new String[] {
+                nameColor + cropName,
+                "§8▬▬▬▬▬▬▬▬▬▬▬",
+                statusText,
+                "§7" + progressBar,
+                "§7Stage: §f" + currentAge + "§7/§f" + maxAge
+            };
+        }
+        double basePrice = getBasePrice(crop);
+        java.util.List<String> lines = new java.util.ArrayList<>(java.util.Arrays.asList(
+            nameColor + cropName,
+            "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+            statusText,
+            "§7" + progressBar,
+            "§7Stage: §f" + currentAge + "§7/§f" + maxAge,
+            "§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+            "§7Est. Value: §a$" + String.format("%.0f", basePrice * 0.5) + " §7- §6$" + String.format("%.0f", basePrice * 5.0),
+            "§7Tiers: §7C §aU §9R §5E §6L §cM"
+        ));
+        if (ready) lines.add("§e§l⚡ Ready to harvest!");
+        return lines.toArray(new String[0]);
     }
     private String buildProgressBar(int percentage) {
         int filled = percentage / 10;
@@ -156,11 +160,6 @@ public class CropPreviewManager implements Listener {
             case BEETROOTS:         return plugin.getConfig().getDouble("prices.beetroot", 13.0);
             default:                return plugin.getConfig().getDouble("prices.default", 10.0);
         }
-    }
-    private String[] getPossibleTiers() {
-        return new String[] {
-            "§7Common §a§lU§9R§5E§6L§cM"
-        };
     }
     private boolean isTrackedCrop(Material material) {
         return material == Material.WHEAT ||
