@@ -11,8 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 public class AdminPanelGUI implements Listener {
     private final FarmCrops plugin;
     public AdminPanelGUI(FarmCrops plugin) {
@@ -20,129 +19,83 @@ public class AdminPanelGUI implements Listener {
     }
     public void openMainPanel(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27, ChatColor.RED + "Admin Panel");
+        // Border
         ItemStack glass = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta gm = glass.getItemMeta();
-        if (gm != null) { gm.setDisplayName(" "); glass.setItemMeta(gm); }
-        for (int i = 0; i < 27; i++) gui.setItem(i, glass);
+        if (gm != null) {
+            gm.setDisplayName(" ");
+            glass.setItemMeta(gm);
+        }
+        for (int i : new int[]{0,1,2,3,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26}) {
+            gui.setItem(i, glass);
+        }
+        // Give Custom Crop
         gui.setItem(10, createItem(Material.WHEAT,
-            ChatColor.GREEN + "" + ChatColor.BOLD + "Give Crops",
+            ChatColor.GREEN + "" + ChatColor.BOLD + "Give Custom Crop",
             "",
-            ChatColor.GRAY + "Give custom crops to players",
-            ChatColor.GRAY + "Use: /farmgive <player> <crop> <weight> <rarity>",
+            ChatColor.GRAY + "Command: " + ChatColor.WHITE + "/farmgive <player> <crop> <weight> <tier>",
             "",
-            ChatColor.YELLOW + "Example: /farmgive Samiel wheat 5.0 MYTHIC"
+            ChatColor.YELLOW + "Example:",
+            ChatColor.WHITE + "/farmgive Samiel wheat 5.0 mythic"
         ));
-        gui.setItem(11, createItem(Material.BARRIER,
-            ChatColor.RED + "" + ChatColor.BOLD + "Clear Player Data",
+        // Reset Player Stats
+        gui.setItem(12, createItem(Material.BARRIER,
+            ChatColor.RED + "" + ChatColor.BOLD + "Reset Player Stats",
             "",
-            ChatColor.GRAY + "Reset a player's stats",
-            ChatColor.GRAY + "Use: /farmstats <player> reset",
+            ChatColor.GRAY + "Command: " + ChatColor.WHITE + "/farm reset <player>",
             "",
-            ChatColor.YELLOW + "Clears all farming data"
+            ChatColor.YELLOW + "Example:",
+            ChatColor.WHITE + "/farm reset Samiel",
+            "",
+            ChatColor.DARK_RED + "⚠ This deletes ALL farming data!"
         ));
-        gui.setItem(12, createItem(Material.PAPER,
+        // Reload Config
+        gui.setItem(14, createItem(Material.WRITABLE_BOOK,
             ChatColor.AQUA + "" + ChatColor.BOLD + "Reload Config",
             "",
-            ChatColor.GRAY + "Reload configuration",
-            ChatColor.GRAY + "Use: /farmreload",
+            ChatColor.GRAY + "Command: " + ChatColor.WHITE + "/farmreload",
             "",
-            ChatColor.YELLOW + "Refreshes all settings"
+            ChatColor.GRAY + "Reloads config.yml without restarting"
         ));
-        gui.setItem(13, createItem(Material.BOOK,
-            ChatColor.GOLD + "" + ChatColor.BOLD + "View Stats",
+        // Server Settings
+        gui.setItem(16, createItem(Material.COMPARATOR,
+            ChatColor.GOLD + "" + ChatColor.BOLD + "Server Settings",
             "",
-            ChatColor.GRAY + "View any player's stats",
-            ChatColor.GRAY + "Use: /farmstats <player>",
+            ChatColor.GRAY + "Command: " + ChatColor.WHITE + "/farmsettings",
             "",
-            ChatColor.YELLOW + "Check farming progress"
+            ChatColor.GRAY + "Opens server-wide plugin settings"
         ));
-        gui.setItem(14, createItem(Material.COMPARATOR,
-            ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Server Settings",
-            "",
-            ChatColor.GRAY + "Configure server settings",
-            ChatColor.GRAY + "Use: /farmsettings",
-            "",
-            ChatColor.YELLOW + "Adjust global options"
-        ));
-        gui.setItem(15, createItem(Material.CHEST,
-            ChatColor.YELLOW + "" + ChatColor.BOLD + "Backup Data",
-            "",
-            ChatColor.GRAY + "Backup all player data",
-            ChatColor.GRAY + "Use: /farmbackup",
-            "",
-            ChatColor.YELLOW + "Creates data backup"
-        ));
-        gui.setItem(16, createItem(Material.PLAYER_HEAD,
-            ChatColor.GREEN + "" + ChatColor.BOLD + "Online Players",
-            "",
-            ChatColor.GRAY + "Players online: " + ChatColor.WHITE + Bukkit.getOnlinePlayers().size(),
-            ChatColor.GRAY + "View leaderboard: /farmtop"
-        ));
-        gui.setItem(22, createItem(Material.ARROW,
+        // Close
+        gui.setItem(4, createItem(Material.OAK_DOOR,
             ChatColor.RED + "" + ChatColor.BOLD + "Close"
         ));
         player.openInventory(gui);
     }
-    @EventHandler
-    public void onClick(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) e.getWhoClicked();
-        if (!e.getView().getTitle().equals(ChatColor.RED + "Admin Panel")) return;
-        e.setCancelled(true);
-        if (e.getClickedInventory() == null) return;
-        int slot = e.getSlot();
-        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-        switch (slot) {
-            case 10:
-                player.closeInventory();
-                player.sendMessage(ChatColor.GREEN + "Usage: " + ChatColor.WHITE + "/farmgive <player> <crop> <weight> <rarity>");
-                player.sendMessage(ChatColor.GRAY + "Example: /farmgive Samiel wheat 5.0 MYTHIC");
-                break;
-            case 11:
-                player.closeInventory();
-                player.sendMessage(ChatColor.YELLOW + "To clear player data, use:");
-                player.sendMessage(ChatColor.WHITE + "/farmstats <player> reset");
-                break;
-            case 12:
-                player.closeInventory();
-                plugin.reloadConfig();
-                player.sendMessage(ChatColor.GREEN + "✓ Configuration reloaded!");
-                break;
-            case 13:
-                player.closeInventory();
-                plugin.getTopGUI().openGUI(player, 1);
-                break;
-            case 14:
-                player.closeInventory();
-                plugin.getSettingsGUI().openGUI(player);
-                break;
-            case 15:
-                player.closeInventory();
-                player.performCommand("farmbackup");
-                break;
-            case 16:
-                player.closeInventory();
-                plugin.getTopGUI().openGUI(player, 1);
-                break;
-            case 22:
-                player.closeInventory();
-                break;
-        }
-    }
-    private ItemStack createItem(Material material, String... lore) {
-        ItemStack item = new ItemStack(material);
+    private ItemStack createItem(Material mat, String... lines) {
+        ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        if (meta != null && lore.length > 0) {
-            meta.setDisplayName(lore[0]);
-            if (lore.length > 1) {
-                List<String> loreList = new ArrayList<>();
-                for (int i = 1; i < lore.length; i++) {
-                    loreList.add(lore[i]);
+        if (meta != null && lines.length > 0) {
+            meta.setDisplayName(lines[0]);
+            if (lines.length > 1) {
+                List<String> lore = new ArrayList<>();
+                for (int i = 1; i < lines.length; i++) {
+                    lore.add(lines[i]);
                 }
-                meta.setLore(loreList);
+                meta.setLore(lore);
             }
             item.setItemMeta(meta);
         }
         return item;
+    }
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        if (!e.getView().getTitle().equals(ChatColor.RED + "Admin Panel")) return;
+        e.setCancelled(true);
+        if (!(e.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) e.getWhoClicked();
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+        if (e.getSlot() == 4) {
+            player.closeInventory();
+        }
     }
 }
