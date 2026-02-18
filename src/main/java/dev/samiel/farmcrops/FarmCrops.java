@@ -138,15 +138,8 @@ public class FarmCrops extends JavaPlugin implements Listener {
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if (!player.isOnline()) return;
             player.sendMessage("");
-            player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "    FARMCROPS v" + getDescription().getVersion());
-            player.sendMessage("");
-            player.sendMessage(ChatColor.YELLOW + "FarmCrops is running on this server!");
-            player.sendMessage(ChatColor.GRAY + "Use /farm to manage the plugin.");
-            player.sendMessage(ChatColor.GRAY + "This message only shows once.");
-            player.sendMessage("");
-            player.sendMessage(ChatColor.GRAY + "Disable in config.yml: show-welcome-message: false");
-            player.sendMessage(ChatColor.GREEN + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            player.sendMessage(ChatColor.GOLD + "Thanks for using FarmCrops!");
+            player.sendMessage(ChatColor.GRAY + "Type " + ChatColor.WHITE + "/farm" + ChatColor.GRAY + " to get started.");
             player.sendMessage("");
         }, 40L);
     }
